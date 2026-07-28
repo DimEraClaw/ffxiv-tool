@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFXIV 2026 粉絲節訪談圖卡產生器</title>
+    <!-- Google Fonts: Montserrat (英數) & Noto Sans TC (繁中) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;1,300&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for UI Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- html2canvas for browser-side image rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Control Panel -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-area">
+                    <span class="ff-crest"> XIV </span>
+                    <h1>圖卡產生器</h1>
+                </div>
+                <p class="subtitle">2026 歐洲粉絲節媒體聯訪</p>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Export Mode Selection -->
+                <div class="control-group">
+                    <label class="group-title"><i class="fa-solid fa-layer-group"></i> 輸出版面模式</label>
+                    <div class="toggle-buttons">
+                        <button id="btn-mode-card" class="toggle-btn active" onclick="switchMode('card')">
+                            <i class="fa-regular fa-clone"></i> 分頁圖卡
+                        </button>
+                        <button id="btn-mode-long" class="toggle-btn" onclick="switchMode('long')">
+                            <i class="fa-solid fa-arrows-up-down"></i> 一條龍長圖
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Theme Selection -->
+                <div class="control-group">
+                    <label for="theme-select" class="group-title"><i class="fa-solid fa-palette"></i> 視覺主題模板</label>
+                    <select id="theme-select" class="styled-select" onchange="updateTheme(this.value)">
+                        <option value="theme-ff-dark">FFXIV 經典黑金 (Deep Dark & Gold)</option>
+                        <option value="theme-seabreeze">銀海天舟 (Oceanic Blue Gradient)</option>
+                        <option value="theme-minimal-light">極簡淡雅 (Minimal Light)</option>
+                        <option value="theme-meteor-red">衛月之紅 (Meteor Red & Charcoal)</option>
+                    </select>
+                </div>
+
+                <!-- Card Settings -->
+                <div class="control-group">
+                    <label class="group-title"><i class="fa-solid fa-sliders"></i> 樣式微調</label>
+                    
+                    <div class="slider-item">
+                        <div class="slider-label">
+                            <span>字型大小 (內文)</span>
+                            <span id="font-size-val">17px</span>
+                        </div>
+                        <input type="range" id="input-font-size" min="14" max="24" value="17" step="1" oninput="changeStyle('fontSize', this.value)">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label">
+                            <span>行高 (字距行距)</span>
+                            <span id="line-height-val">1.6</span>
+                        </div>
+                        <input type="range" id="input-line-height" min="1.3" max="2.0" value="1.6" step="0.1" oninput="changeStyle('lineHeight', this.value)">
+                    </div>
+
+                    <div class="slider-item">
+                        <div class="slider-label">
+                            <span>卡片內邊距</span>
+                            <span id="padding-val">40px</span>
+                        </div>
+                        <input type="range" id="input-padding" min="20" max="60" value="40" step="5" oninput="changeStyle('padding', this.value)">
+                    </div>
+                </div>
+
+                <!-- Decorative Elements -->
+                <div class="control-group">
+                    <label class="group-title"><i class="fa-solid fa-wand-magic-sparkles"></i> 裝飾元素</label>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="check-border" checked onchange="toggleDecoration('border', this.checked)">
+                        <label for="check-border">顯示 FFXIV 質感金屬邊框</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="check-quote" checked onchange="toggleDecoration('quote', this.checked)">
+                        <label for="check-quote">標題前方顯示金屬裝飾標記</label>
+                    </div>
+                </div>
+
+                <!-- Exporter Actions -->
+                <div class="control-group action-group">
+                    <label class="group-title"><i class="fa-solid fa-download"></i> 圖片導出與下載</label>
+                    <button id="btn-download-single" class="action-btn primary-btn">
+                        <i class="fa-solid fa-file-image"></i> 下載當前單張卡片
+                    </button>
+                    <button id="btn-download-all" class="action-btn secondary-btn">
+                        <i class="fa-solid fa-file-zipper"></i> 批次導出所有分頁卡片
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>💡 提示：您可以<b>雙擊右側預覽的文字</b>直接進行修改，修改後再匯出即可！</p>
+                <p class="copyright">Designed for FFXIV community.</p>
+            </div>
+        </aside>
+
+        <!-- Main Display / Preview Area -->
+        <main class="preview-area">
+            <!-- Card Navigation (Only visible in 'card' mode) -->
+            <div id="card-navigator" class="navigator">
+                <button class="nav-btn" onclick="prevCard()"><i class="fa-solid fa-chevron-left"></i> 上一張</button>
+                <div class="nav-indicators" id="nav-indicators">
+                    <!-- Dynamic indicators will go here -->
+                </div>
+                <button class="nav-btn" onclick="nextCard()">下一張 <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+
+            <!-- Scrollable Workspace containing the target to export -->
+            <div class="canvas-workspace">
+                <!-- This container is what html2canvas will capture -->
+                <div id="export-target" class="theme-ff-dark show-border show-quote">
+                    <!-- Dynamic slides will be inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom Script -->
+    <script src="app.js"></script>
+</body>
+</html>
