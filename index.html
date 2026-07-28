@@ -3,134 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FFXIV 2026 粉絲節訪談圖卡產生器</title>
-    <!-- Google Fonts: Montserrat (英數) & Noto Sans TC (繁中) -->
+    <title>FFXIV 潛水艇/飛空艇探索計時器</title>
+    <!-- Google Fonts: Noto Sans TC (繁中) & Montserrat (英數) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;1,300&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome for UI Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
-    <!-- html2canvas for browser-side image rendering -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar Control Panel -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-area">
-                    <span class="ff-crest"> XIV </span>
-                    <h1>圖卡產生器</h1>
-                </div>
-                <p class="subtitle">2026 歐洲粉絲節媒體聯訪</p>
+    <div class="app-wrapper">
+        <!-- FFXIV Style Main Banner / Title Bar -->
+        <header class="main-header">
+            <div class="header-title">
+                <i class="fa-solid fa-anchor gold-icon"></i>
+                <h2>請選擇潛水艇 / 飛空艇</h2>
             </div>
-
-            <div class="sidebar-content">
-                <!-- Export Mode Selection -->
-                <div class="control-group">
-                    <label class="group-title"><i class="fa-solid fa-layer-group"></i> 輸出版面模式</label>
-                    <div class="toggle-buttons">
-                        <button id="btn-mode-card" class="toggle-btn active" onclick="switchMode('card')">
-                            <i class="fa-regular fa-clone"></i> 分頁圖卡
-                        </button>
-                        <button id="btn-mode-long" class="toggle-btn" onclick="switchMode('long')">
-                            <i class="fa-solid fa-arrows-up-down"></i> 一條龍長圖
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Theme Selection -->
-                <div class="control-group">
-                    <label for="theme-select" class="group-title"><i class="fa-solid fa-palette"></i> 視覺主題模板</label>
-                    <select id="theme-select" class="styled-select" onchange="updateTheme(this.value)">
-                        <option value="theme-ff-dark">FFXIV 經典黑金 (Deep Dark & Gold)</option>
-                        <option value="theme-seabreeze">銀海天舟 (Oceanic Blue Gradient)</option>
-                        <option value="theme-minimal-light">極簡淡雅 (Minimal Light)</option>
-                        <option value="theme-meteor-red">衛月之紅 (Meteor Red & Charcoal)</option>
-                    </select>
-                </div>
-
-                <!-- Card Settings -->
-                <div class="control-group">
-                    <label class="group-title"><i class="fa-solid fa-sliders"></i> 樣式微調</label>
-                    
-                    <div class="slider-item">
-                        <div class="slider-label">
-                            <span>字型大小 (內文)</span>
-                            <span id="font-size-val">17px</span>
-                        </div>
-                        <input type="range" id="input-font-size" min="14" max="24" value="17" step="1" oninput="changeStyle('fontSize', this.value)">
-                    </div>
-
-                    <div class="slider-item">
-                        <div class="slider-label">
-                            <span>行高 (字距行距)</span>
-                            <span id="line-height-val">1.6</span>
-                        </div>
-                        <input type="range" id="input-line-height" min="1.3" max="2.0" value="1.6" step="0.1" oninput="changeStyle('lineHeight', this.value)">
-                    </div>
-
-                    <div class="slider-item">
-                        <div class="slider-label">
-                            <span>卡片內邊距</span>
-                            <span id="padding-val">40px</span>
-                        </div>
-                        <input type="range" id="input-padding" min="20" max="60" value="40" step="5" oninput="changeStyle('padding', this.value)">
-                    </div>
-                </div>
-
-                <!-- Decorative Elements -->
-                <div class="control-group">
-                    <label class="group-title"><i class="fa-solid fa-wand-magic-sparkles"></i> 裝飾元素</label>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="check-border" checked onchange="toggleDecoration('border', this.checked)">
-                        <label for="check-border">顯示 FFXIV 質感金屬邊框</label>
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="check-quote" checked onchange="toggleDecoration('quote', this.checked)">
-                        <label for="check-quote">標題前方顯示金屬裝飾標記</label>
-                    </div>
-                </div>
-
-                <!-- Exporter Actions -->
-                <div class="control-group action-group">
-                    <label class="group-title"><i class="fa-solid fa-download"></i> 圖片導出與下載</label>
-                    <button id="btn-download-single" class="action-btn primary-btn">
-                        <i class="fa-solid fa-file-image"></i> 下載當前單張卡片
-                    </button>
-                    <button id="btn-download-all" class="action-btn secondary-btn">
-                        <i class="fa-solid fa-file-zipper"></i> 批次導出所有分頁卡片
-                    </button>
-                </div>
+            <div class="header-actions">
+                <button class="ff-btn btn-secondary" onclick="toggleSettings()" title="音效設定">
+                    <i class="fa-solid fa-gear"></i> 音效設定
+                </button>
+                <button class="ff-btn btn-primary" onclick="openAddWorkshopModal()">
+                    <i class="fa-solid fa-plus"></i> 新增部隊工坊
+                </button>
+                <button class="ff-btn btn-secondary" onclick="playTestSound()">
+                    <i class="fa-solid fa-volume-high"></i> 測試提示音
+                </button>
             </div>
+        </header>
 
-            <div class="sidebar-footer">
-                <p>💡 提示：您可以<b>雙擊右側預覽的文字</b>直接進行修改，修改後再匯出即可！</p>
-                <p class="copyright">Designed for FFXIV community.</p>
+        <!-- Collapsible Settings Panel -->
+        <div id="settings-panel" class="settings-panel" style="display: none;">
+            <div class="card-border-frame">
+                <div class="ff-corner ff-corner-tl"></div>
+                <div class="ff-corner ff-corner-tr"></div>
+                <div class="ff-corner ff-corner-bl"></div>
+                <div class="ff-corner ff-corner-br"></div>
             </div>
-        </aside>
+            <div class="settings-body">
+                <label for="custom-audio-url"><i class="fa-solid fa-music gold-icon"></i> 自訂探索結束提示音網址 (MP3/WAV)：</label>
+                <input type="text" id="custom-audio-url" placeholder="請輸入音效 URL (留空則使用預設的 FFXIV 水晶合成音效)" class="ff-input" onchange="saveCustomAudioUrl(this.value)">
+            </div>
+        </div>
 
-        <!-- Main Display / Preview Area -->
-        <main class="preview-area">
-            <!-- Card Navigation (Only visible in 'card' mode) -->
-            <div id="card-navigator" class="navigator">
-                <button class="nav-btn" onclick="prevCard()"><i class="fa-solid fa-chevron-left"></i> 上一張</button>
-                <div class="nav-indicators" id="nav-indicators">
-                    <!-- Dynamic indicators will go here -->
-                </div>
-                <button class="nav-btn" onclick="nextCard()">下一張 <i class="fa-solid fa-chevron-right"></i></button>
-            </div>
-
-            <!-- Scrollable Workspace containing the target to export -->
-            <div class="canvas-workspace">
-                <!-- This container is what html2canvas will capture -->
-                <div id="export-target" class="theme-ff-dark show-border show-quote">
-                    <!-- Dynamic slides will be inserted here -->
-                </div>
-            </div>
+        <!-- Grid Container for Workshops (Multi-column) -->
+        <main class="workshops-grid" id="workshops-container">
+            <!-- Dynamic Workshop Card Elements will be rendered here -->
         </main>
+    </div>
+
+    <!-- Modal 1: Add/Edit Workshop -->
+    <div id="workshop-modal" class="modal-overlay">
+        <div class="ff-dialog">
+            <div class="card-border-frame">
+                <div class="ff-corner ff-corner-tl"></div>
+                <div class="ff-corner ff-corner-tr"></div>
+                <div class="ff-corner ff-corner-bl"></div>
+                <div class="ff-corner ff-corner-br"></div>
+            </div>
+            <h3 class="dialog-title" id="workshop-modal-title">新增部隊工坊</h3>
+            <div class="dialog-body">
+                <div class="form-group">
+                    <label for="workshop-name">工坊/部隊名稱：</label>
+                    <input type="text" id="workshop-name" placeholder="例如：空想秘錄、材料探索" class="ff-input">
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="ff-btn btn-primary" onclick="saveWorkshop()">確認</button>
+                <button class="ff-btn btn-secondary" onclick="closeModal('workshop-modal')">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Edit Submersible Timer -->
+    <div id="sub-modal" class="modal-overlay">
+        <div class="ff-dialog dialog-large">
+            <div class="card-border-frame">
+                <div class="ff-corner ff-corner-tl"></div>
+                <div class="ff-corner ff-corner-tr"></div>
+                <div class="ff-corner ff-corner-bl"></div>
+                <div class="ff-corner ff-corner-br"></div>
+            </div>
+            <h3 class="dialog-title" id="sub-modal-title">潛水艇探索設定</h3>
+            <div class="dialog-body">
+                <input type="hidden" id="current-workshop-idx">
+                <input type="hidden" id="current-sub-idx">
+                
+                <div class="form-group">
+                    <label for="sub-name">潛水艇名稱：</label>
+                    <input type="text" id="sub-name" placeholder="例如：潛水艇-1" class="ff-input">
+                </div>
+
+                <div class="form-group-row">
+                    <div class="form-group col-half">
+                        <label for="sub-level">等級 (級)：</label>
+                        <input type="number" id="sub-level" placeholder="64" min="1" max="120" class="ff-input">
+                    </div>
+                    <div class="form-group col-half">
+                        <label for="sub-type">類型：</label>
+                        <select id="sub-type" class="ff-select">
+                            <option value="潜水艇">潛水艇</option>
+                            <option value="飞空艇">飛空艇</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Timer Section -->
+                <div class="timer-config-box">
+                    <label class="section-label">🕒 探索時長設定</label>
+
+                    <!-- Custom inputs -->
+                    <div class="custom-time-inputs">
+                        <div class="time-input-item">
+                            <input type="number" id="input-days" min="0" value="0" class="ff-input time-num">
+                            <span>天</span>
+                        </div>
+                        <div class="time-input-item">
+                            <input type="number" id="input-hours" min="0" max="23" value="0" class="ff-input time-num">
+                            <span>小時</span>
+                        </div>
+                        <div class="time-input-item">
+                            <input type="number" id="input-mins" min="0" max="59" value="0" class="ff-input time-num">
+                            <span>分鐘</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="ff-btn btn-primary" onclick="saveSubmersible()">開始探索</button>
+                <button class="ff-btn btn-warning" id="btn-standby-sub" onclick="setSubStandby()">設為待命/返航</button>
+                <button class="ff-btn btn-danger" id="btn-delete-sub" onclick="deleteSubmersible()">刪除機體</button>
+                <button class="ff-btn btn-secondary" onclick="closeModal('sub-modal')">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Alarm Alert (Looping) -->
+    <div id="alarm-modal" class="modal-overlay">
+        <div class="ff-dialog">
+            <div class="card-border-frame">
+                <div class="ff-corner ff-corner-tl"></div>
+                <div class="ff-corner ff-corner-tr"></div>
+                <div class="ff-corner ff-corner-bl"></div>
+                <div class="ff-corner ff-corner-br"></div>
+            </div>
+            <h3 class="dialog-title" style="color: var(--ff-text-gold);"><i class="fa-solid fa-bell fa-bounce" style="color: var(--ff-text-gold); margin-right: 8px;"></i> 探索結束通知</h3>
+            <div class="dialog-body" style="text-align: center; gap: 10px;">
+                <p style="font-size: 14px; color: var(--ff-text-normal);">以下探索機體已順利返航：</p>
+                <div id="alarm-sub-list" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(140, 115, 85, 0.2); border-radius: 4px; padding: 12px; margin: 10px 0; max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Dynamically populated list -->
+                </div>
+            </div>
+            <div class="dialog-footer" style="justify-content: center; padding-top: 14px;">
+                <button class="ff-btn btn-warning" onclick="dismissAlarm()" style="width: 100%; padding: 12px; font-size: 14px;">
+                    <i class="fa-solid fa-volume-xmark"></i> 關閉鬧鐘提示音
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Custom Script -->
