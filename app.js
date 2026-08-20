@@ -1530,6 +1530,9 @@ function runRouteSearch() {
     const objective = (document.getElementById("route-objective") && document.getElementById("route-objective").value) || "exp";
     const targetHours = parseFloat(document.getElementById("route-target-time") ? document.getElementById("route-target-time").value : "999") || 999;
 
+    const levelInput = document.getElementById("route-level");
+    const subLevel = parseInt(levelInput ? levelInput.value : "50") || 50;
+
     const stats = updateRouteSubStats();
     const rangeLimit = stats.range;
     const speed = stats.speed;
@@ -1541,12 +1544,12 @@ function runRouteSearch() {
     container.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--ff-text-gray);"><i class="fa-solid fa-spinner fa-spin"></i> 正在演算最佳航線...</div>`;
 
     setTimeout(() => {
-        const results = searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit, speed);
+        const results = searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit, speed, subLevel);
         renderRouteResults(results, rangeLimit, speed, objective, chartKey);
     }, 15);
 }
 
-function searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit, speed) {
+function searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit, speed, subLevel) {
     const chartData = SECTOR_DATABASE[chartKey];
     if (!chartData) return [];
 
@@ -1559,8 +1562,10 @@ function searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit
         unlockedIds = chartData.sectors.map(s => s.id);
     }
 
-    // Filter available sectors that user has unlocked
-    const availableSectors = chartData.sectors.filter(s => unlockedIds.includes(s.id));
+    const currentSubLevel = subLevel || 50;
+
+    // Filter available sectors that user has unlocked AND meets rank requirement
+    const availableSectors = chartData.sectors.filter(s => unlockedIds.includes(s.id) && (s.rankReq || 1) <= currentSubLevel);
     if (availableSectors.length === 0) return [];
 
     const maxMinutes = targetHours * 60;
@@ -1584,6 +1589,7 @@ function searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit
         if (len >= 1) {
             const evalRes = evaluateRoute(currentRoute, chartData, speed);
             if (evalRes.totalRangeCost > rangeLimit) return;
+            if (evalRes.maxRankReq > currentSubLevel) return;
             if (evalRes.totalMinutes <= maxMinutes) {
                 let score = 0;
                 if (objective === "gil") {
