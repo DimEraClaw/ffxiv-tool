@@ -1347,15 +1347,19 @@ function calculateSubStats() {
    Work Item 05: Smart Route Recommender System
    ========================================================================== */
 
-function calculate3DDistance(p1, p2) {
+function calculateMapDistance(p1, p2, chartKey) {
     const dx = p1.x - p2.x;
     const dy = p1.y - p2.y;
+    if (chartKey === "drowned_city") {
+        return Math.round(Math.sqrt(dx * dx + dy * dy) * 0.0903);
+    }
     const dz = p1.z - p2.z;
     return Math.floor(Math.sqrt(dx * dx + dy * dy + dz * dz) / 10);
 }
 
-function evaluateRoute(sectorList, chartData, speed) {
+function evaluateRoute(sectorList, chartData, speed, chartKey) {
     if (!sectorList || sectorList.length === 0) return null;
+    const isMap1 = (chartKey === "drowned_city");
     const safeSpeed = Math.max(1, speed || 100);
     const start = chartData.start;
     let totalTravelMinutes = 0;
@@ -1365,13 +1369,15 @@ function evaluateRoute(sectorList, chartData, speed) {
     let maxRankReq = 1;
     let gilTargetCount = 0;
 
+    // Survey factor: Map 1 (16730) vs Map 2+ (7015)
+    const surveyFactor = isMap1 ? 16730 : 7015;
+
     // 1. Home to First Sector
-    const distToFirst = calculate3DDistance(start, sectorList[0]);
+    const distToFirst = calculateMapDistance(start, sectorList[0], chartKey);
     totalTravelMinutes += Math.floor((distToFirst * 39.9) / safeSpeed);
     totalRangeCost += distToFirst;
     
-    // In FFXIV / Mogship: Survey Time is reduced by Speed with factor (7015 / (speed * 60))
-    const sTime0 = Math.floor((sectorList[0].surveyDurationMin * 7015) / (safeSpeed * 60));
+    const sTime0 = Math.floor((sectorList[0].surveyDurationMin * surveyFactor) / (safeSpeed * 60));
     totalSurveyMinutes += sTime0;
     totalExp += sectorList[0].expReward;
     maxRankReq = Math.max(maxRankReq, sectorList[0].rankReq || 1);
@@ -1379,11 +1385,11 @@ function evaluateRoute(sectorList, chartData, speed) {
 
     // 2. Intermediate legs
     for (let i = 0; i < sectorList.length - 1; i++) {
-        const legDist = calculate3DDistance(sectorList[i], sectorList[i + 1]);
+        const legDist = calculateMapDistance(sectorList[i], sectorList[i + 1], chartKey);
         totalTravelMinutes += Math.floor((legDist * 39.9) / safeSpeed);
         totalRangeCost += legDist;
         
-        const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * 7015) / (safeSpeed * 60));
+        const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * surveyFactor) / (safeSpeed * 60));
         totalSurveyMinutes += sTime;
         totalExp += sectorList[i + 1].expReward;
         if (sectorList[i + 1].rankReq > maxRankReq) maxRankReq = sectorList[i + 1].rankReq;
@@ -1392,11 +1398,11 @@ function evaluateRoute(sectorList, chartData, speed) {
 
     // 3. Return leg from last sector back to Home
     const lastSector = sectorList[sectorList.length - 1];
-    const distToHome = calculate3DDistance(lastSector, start);
+    const distToHome = calculateMapDistance(lastSector, start, chartKey);
     totalTravelMinutes += Math.floor((distToHome * 39.9) / safeSpeed);
 
-    // Calibrated Range cost to match Mogship and in-game exploration range overhead
-    const calibratedRangeCost = totalRangeCost + Math.floor(sectorList.length * 0.6);
+    // Range calibration
+    const calibratedRangeCost = isMap1 ? totalRangeCost : (totalRangeCost + Math.floor(sectorList.length * 0.6));
 
     const totalMinutes = totalTravelMinutes + totalSurveyMinutes;
     const expPerMin = totalMinutes > 0 ? Math.round(totalExp / totalMinutes) : 0;
@@ -1576,10 +1582,10 @@ function searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit
     const distanceMatrix = {};
     availableSectors.forEach(s1 => {
         distanceMatrix[s1.id] = {
-            distStart: calculate3DDistance(start, s1),
+            distStart: calculateMapDistance(start, s1, chartKey),
             neighbors: availableSectors
                 .filter(s2 => s2.id !== s1.id)
-                .map(s2 => ({ sector: s2, dist: calculate3DDistance(s1, s2) }))
+                .map(s2 => ({ sector: s2, dist: calculateMapDistance(s1, s2, chartKey) }))
                 .sort((a, b) => a.dist - b.dist)
         };
     });
@@ -1587,7 +1593,7 @@ function searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit
     function search(currentRoute, visitedSet, currentRange, currentMinutes) {
         const len = currentRoute.length;
         if (len >= 1) {
-            const evalRes = evaluateRoute(currentRoute, chartData, speed);
+            const evalRes = evaluateRoute(currentRoute, chartData, speed, chartKey);
             if (evalRes.totalRangeCost > rangeLimit) return;
             if (evalRes.maxRankReq > currentSubLevel) return;
             if (evalRes.totalMinutes <= maxMinutes) {
