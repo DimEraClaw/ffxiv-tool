@@ -1407,7 +1407,7 @@ function evaluateRoute(sectorList, chartData, speed, chartKey) {
 
     return {
         sectors: [...sectorList],
-        totalRangeCost: calibratedRangeCost,
+        totalRangeCost,
         totalTravelMinutes,
         totalSurveyMinutes,
         totalMinutes,
