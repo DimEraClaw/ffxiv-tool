@@ -449,6 +449,18 @@ function tickTimers() {
                         const timeValSpan = element.querySelector(".time-val");
                         if (timeValSpan) {
                             timeValSpan.textContent = formatRemainingTime(diff);
+
+                            // Dynamic color classes based on remaining time:
+                            // <= 1 hr (3600000ms): Red (.time-urgent)
+                            // <= 8 hrs (28800000ms): Orange (.time-warning)
+                            // > 8 hrs: Green (.time-safe)
+                            if (diff <= 60 * 60 * 1000) {
+                                timeValSpan.className = "time-val time-urgent";
+                            } else if (diff <= 8 * 60 * 60 * 1000) {
+                                timeValSpan.className = "time-val time-warning";
+                            } else {
+                                timeValSpan.className = "time-val time-safe";
+                            }
                         }
                     }
                     // Update progress gradient background

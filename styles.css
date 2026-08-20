@@ -254,6 +254,26 @@ body {
     font-weight: 500;
     margin-left: 4px;
     font-family: 'Montserrat', monospace;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Time Threshold Dynamic Colors */
+.status-running .time-val.time-urgent {
+    color: #ff5c5c; /* <= 1 hr: Red */
+    font-weight: 700;
+    text-shadow: 0 0 6px rgba(255, 92, 92, 0.6);
+}
+
+.status-running .time-val.time-warning {
+    color: #ffaa33; /* <= 8 hrs: Orange */
+    font-weight: 700;
+    text-shadow: 0 0 6px rgba(255, 170, 51, 0.45);
+}
+
+.status-running .time-val.time-safe {
+    color: #55db78; /* > 8 hrs: Green */
+    font-weight: 500;
+    text-shadow: 0 0 5px rgba(85, 219, 120, 0.35);
 }
 
 .status-returned {
