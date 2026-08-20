@@ -1351,7 +1351,10 @@ function calculateMapDistance(p1, p2, chartKey) {
     const dx = p1.x - p2.x;
     const dy = p1.y - p2.y;
     if (chartKey === "drowned_city") {
-        return Math.round(Math.sqrt(dx * dx + dy * dy) * 0.0903);
+        const rawDist = Math.sqrt(dx * dx + dy * dy);
+        const moveDist = Math.round(rawDist * 0.058);
+        const surveyDist = p2.surveyDistance || 0;
+        return moveDist + surveyDist;
     }
     const dz = p1.z - p2.z;
     return Math.floor(Math.sqrt(dx * dx + dy * dy + dz * dz) / 10);
