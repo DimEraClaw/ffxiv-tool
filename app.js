@@ -1352,7 +1352,7 @@ function calculateMapDistance(p1, p2, chartKey) {
     const dy = p1.y - p2.y;
     if (chartKey === "drowned_city") {
         const rawDist = Math.sqrt(dx * dx + dy * dy);
-        const moveDist = Math.round(rawDist * 0.058);
+        const moveDist = Math.round(rawDist * 0.045);
         const surveyDist = p2.surveyDistance || 0;
         return moveDist + surveyDist;
     }
@@ -1362,7 +1362,6 @@ function calculateMapDistance(p1, p2, chartKey) {
 
 function evaluateRoute(sectorList, chartData, speed, chartKey) {
     if (!sectorList || sectorList.length === 0) return null;
-    const isMap1 = (chartKey === "drowned_city");
     const safeSpeed = Math.max(1, speed || 100);
     const start = chartData.start;
     let totalTravelMinutes = 0;
@@ -1372,16 +1371,14 @@ function evaluateRoute(sectorList, chartData, speed, chartKey) {
     let maxRankReq = 1;
     let gilTargetCount = 0;
 
-    // Factors by map
-    const surveyFactor = isMap1 ? 16730 : 4142;
-    const moveFactor = isMap1 ? 39.9 : 1177.5;
+    const moveFactor = 1177.5;
 
     // 1. Home to First Sector
     const distToFirst = calculateMapDistance(start, sectorList[0], chartKey);
     totalTravelMinutes += Math.floor((distToFirst * moveFactor) / safeSpeed);
     totalRangeCost += distToFirst;
     
-    const sTime0 = Math.floor((sectorList[0].surveyDurationMin * surveyFactor) / (safeSpeed * 60));
+    const sTime0 = Math.floor((sectorList[0].surveyDurationMin * 70) / safeSpeed);
     totalSurveyMinutes += sTime0;
     totalExp += sectorList[0].expReward;
     maxRankReq = Math.max(maxRankReq, sectorList[0].rankReq || 1);
@@ -1393,7 +1390,7 @@ function evaluateRoute(sectorList, chartData, speed, chartKey) {
         totalTravelMinutes += Math.floor((legDist * moveFactor) / safeSpeed);
         totalRangeCost += legDist;
         
-        const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * surveyFactor) / (safeSpeed * 60));
+        const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * 70) / safeSpeed);
         totalSurveyMinutes += sTime;
         totalExp += sectorList[i + 1].expReward;
         if (sectorList[i + 1].rankReq > maxRankReq) maxRankReq = sectorList[i + 1].rankReq;
@@ -1404,9 +1401,6 @@ function evaluateRoute(sectorList, chartData, speed, chartKey) {
     const lastSector = sectorList[sectorList.length - 1];
     const distToHome = calculateMapDistance(lastSector, start, chartKey);
     totalTravelMinutes += Math.floor((distToHome * moveFactor) / safeSpeed);
-
-    // Range calibration
-    const calibratedRangeCost = isMap1 ? totalRangeCost : totalRangeCost;
 
     const totalMinutes = totalTravelMinutes + totalSurveyMinutes;
     const expPerMin = totalMinutes > 0 ? Math.round(totalExp / totalMinutes) : 0;
