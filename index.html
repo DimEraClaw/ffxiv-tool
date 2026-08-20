@@ -11,7 +11,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="styles.css?v=2.1">
+    <link rel="stylesheet" href="styles.css?v=3.0">
 </head>
 <body>
     <div class="app-wrapper">
@@ -25,8 +25,8 @@
                 <button class="ff-btn btn-secondary" onclick="toggleSettings()" title="音效設定">
                     <i class="fa-solid fa-gear"></i> 音效設定
                 </button>
-                <button class="ff-btn btn-primary" onclick="openStatsCalculator()" title="船艦屬性計算器">
-                    <i class="fa-solid fa-calculator"></i> 屬性計算器
+                <button class="ff-btn btn-primary" onclick="openRoutePlannerModal()" title="智慧航線推薦">
+                    <i class="fa-solid fa-compass"></i> 航線推薦
                 </button>
                 <button class="ff-btn btn-primary" onclick="openAddWorkshopModal()">
                     <i class="fa-solid fa-plus"></i> 新增部隊工坊
@@ -273,7 +273,130 @@
         </div>
     </div>
 
+    <!-- Modal 6: Submersible Route Recommender -->
+    <div id="route-modal" class="modal-overlay">
+        <div class="ff-dialog dialog-route-planner">
+            <div class="card-border-frame">
+                <div class="ff-corner ff-corner-tl"></div>
+                <div class="ff-corner ff-corner-tr"></div>
+                <div class="ff-corner ff-corner-bl"></div>
+                <div class="ff-corner ff-corner-br"></div>
+            </div>
+            <h3 class="dialog-title"><i class="fa-solid fa-compass gold-icon" style="margin-right: 8px;"></i> 智慧航線推薦系統</h3>
+            <div class="dialog-body">
+                <!-- Route Planner Settings Bar -->
+                <div class="route-settings-card">
+                    <!-- Row 1: Workshop & Target Filters -->
+                    <div class="route-settings-grid">
+                        <div class="form-group">
+                            <label for="route-ws-select"><i class="fa-solid fa-warehouse gold-icon"></i> 選擇工坊 (解鎖進度)：</label>
+                            <select id="route-ws-select" class="ff-select" onchange="runRouteSearch()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="route-chart-select"><i class="fa-solid fa-map-location-dot gold-icon"></i> 目標海域：</label>
+                            <select id="route-chart-select" class="ff-select" onchange="runRouteSearch()">
+                                <option value="drowned_city">溺沒海 (The Drowned City)</option>
+                                <option value="jade_sea">灰海 (The Jade Sea)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="route-objective"><i class="fa-solid fa-bullseye gold-icon"></i> 推薦目標：</label>
+                            <select id="route-objective" class="ff-select" onchange="runRouteSearch()">
+                                <option value="exp" selected>📈 經驗值最大化 (衝等升級)</option>
+                                <option value="gil">💰 沉船金飾撈金 (OJ 優先)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="route-target-time"><i class="fa-solid fa-clock gold-icon"></i> 作息時長限制：</label>
+                            <select id="route-target-time" class="ff-select" onchange="runRouteSearch()">
+                                <option value="999">不限時長 (效益優先)</option>
+                                <option value="24">剛好 24 小時以內 (每日收成)</option>
+                                <option value="20">20 小時以內 (快速循環)</option>
+                                <option value="48">48 小時以內 (雙日長航)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Submersible Level & 4 Parts Configuration (Matching User Spec) -->
+                    <div class="route-sub-config-box">
+                        <div class="route-sub-config-top">
+                            <div class="route-level-input-group">
+                                <label for="route-level"><i class="fa-solid fa-star gold-icon"></i> 潛水艇等級：</label>
+                                <input type="number" id="route-level" class="ff-input" value="50" min="1" max="95" onchange="onRouteLevelChange()">
+                            </div>
+                            <div class="route-stats-badges-container" id="route-stats-badges-container">
+                                <span class="route-mini-badge">探索性能 <strong id="route-badge-surveillance">0</strong></span>
+                                <span class="route-mini-badge">收集性能 <strong id="route-badge-retrieval">0</strong></span>
+                                <span class="route-mini-badge">巡航速度 <strong id="route-badge-speed">0</strong></span>
+                                <span class="route-mini-badge highlight">航行距離 <strong id="route-badge-range">0</strong></span>
+                                <span class="route-mini-badge">恩惠 <strong id="route-badge-favor">0</strong></span>
+                            </div>
+                        </div>
+                        <div class="route-parts-grid">
+                            <div class="form-group">
+                                <label for="route-hull">船體 (Hull)：</label>
+                                <select id="route-hull" class="ff-select" onchange="onRoutePartChange()"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="route-stern">船尾 (Stern)：</label>
+                                <select id="route-stern" class="ff-select" onchange="onRoutePartChange()"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="route-bow">船首 (Bow)：</label>
+                                <select id="route-bow" class="ff-select" onchange="onRoutePartChange()"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="route-bridge">艦橋 (Bridge)：</label>
+                                <select id="route-bridge" class="ff-select" onchange="onRoutePartChange()"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommended Results Container -->
+                <div class="route-results-wrapper">
+                    <div class="route-results-header">
+                        <h4><i class="fa-solid fa-list-ol gold-icon"></i> 推薦航線列表 (Top 5)</h4>
+                        <span id="route-search-summary" class="route-search-summary">正在分析航線...</span>
+                    </div>
+                    <div id="route-results-container" class="route-cards-list">
+                        <!-- Cards will be injected dynamically -->
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer" style="justify-content: center; padding-top: 14px;">
+                <button class="ff-btn btn-secondary" onclick="closeModal('route-modal')" style="width: 100%; padding: 12px; font-size: 14px;">
+                    關閉視窗
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 7: Quick Dispatch to Existing Submersible Modal -->
+    <div id="route-dispatch-modal" class="modal-overlay">
+        <div class="ff-dialog" style="max-width: 520px;">
+            <div class="card-border-frame">
+                <div class="ff-corner ff-corner-tl"></div>
+                <div class="ff-corner ff-corner-tr"></div>
+                <div class="ff-corner ff-corner-bl"></div>
+                <div class="ff-corner ff-corner-br"></div>
+            </div>
+            <h3 class="dialog-title"><i class="fa-solid fa-paper-plane gold-icon" style="margin-right: 8px;"></i> 選擇要套用出航的潛水艇</h3>
+            <div class="dialog-body">
+                <div id="route-dispatch-info" style="color: var(--ff-text-normal); font-size: 13px; margin-bottom: 14px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; border: 1px solid rgba(140,115,85,0.3);"></div>
+                <div id="route-dispatch-sub-list" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Submersibles injected dynamically -->
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="ff-btn btn-secondary" onclick="closeModal('route-dispatch-modal')" style="width: 100%;">
+                    取消
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom Script -->
-    <script src="app.js?v=2.1"></script>
+    <script src="app.js?v=3.0"></script>
 </body>
 </html>

@@ -144,63 +144,73 @@ const PART_STATS = {
   }
 };
 
-const DEFAULT_WORKSHOPS = [
-    {
-        name: "空想秘錄",
-        submersibles: [
-            {
-                name: "潛水艇-1",
-                level: 64,
-                type: "潜水艇",
-                status: "探索中",
-                targetTimestamp: Date.now() + (19 * 60 * 60 * 1000) + (57 * 60 * 1000), // 19h 57m
-                totalDurationMs: (19 * 60 * 60 * 1000) + (57 * 60 * 1000),
-                alarmPlayed: false
-            },
-            {
-                name: "潛水艇-2",
-                level: 59,
-                type: "潜水艇",
-                status: "探索中",
-                targetTimestamp: Date.now() + (12 * 60 * 60 * 1000) + (4 * 60 * 1000), // 12h 04m
-                totalDurationMs: (12 * 60 * 60 * 1000) + (4 * 60 * 1000),
-                alarmPlayed: false
-            },
-            {
-                name: "潛水艇-3",
-                level: 54,
-                type: "潜水艇",
-                status: "探索中",
-                targetTimestamp: Date.now() + (8 * 60 * 60 * 1000) + (28 * 60 * 1000), // 8h 28m
-                totalDurationMs: (8 * 60 * 60 * 1000) + (28 * 60 * 1000),
-                alarmPlayed: false
-            },
-            {
-                name: "潛水艇-4",
-                level: 46,
-                type: "潜水艇",
-                status: "探索中",
-                targetTimestamp: Date.now() + (32 * 60 * 60 * 1000) + (58 * 60 * 1000), // 1d 8h 58m = 32h 58m
-                totalDurationMs: (32 * 60 * 60 * 1000) + (58 * 60 * 1000),
-                alarmPlayed: false
-            }
-        ]
-    },
-    {
-        name: "材料探索",
-        submersibles: [
-            {
-                name: "飛空艇-1",
-                level: 50,
-                type: "飞空艇",
-                status: "待命中",
-                targetTimestamp: null,
-                totalDurationMs: null,
-                alarmPlayed: false
-            }
-        ]
-    }
-];
+// Official Datamined Submersible Exploration Database (溺沒海與灰海)
+const SECTOR_DATABASE = {
+  drowned_city: {
+    name: "溺沒海",
+    start: { x: 483, y: 927, z: 0 },
+    sectors: [
+      { id: "A",  name: "潔白淺灘", x: 640, y: 880, z: 100, surveyDurationMin: 180, surveyDistance: 10, expReward: 10610, rankReq: 1 },
+      { id: "B",  name: "溺沒海1", x: 570, y: 750, z: 300, surveyDurationMin: 180, surveyDistance: 10, expReward: 10610, rankReq: 1 },
+      { id: "C",  name: "溺沒海2", x: 740, y: 700, z: 300, surveyDurationMin: 240, surveyDistance: 10, expReward: 27840, rankReq: 4 },
+      { id: "D",  name: "無光海盆", x: 400, y: 850, z: 500, surveyDurationMin: 240, surveyDistance: 10, expReward: 27840, rankReq: 4 },
+      { id: "E",  name: "溺沒海3", x: 650, y: 610, z: 200, surveyDurationMin: 300, surveyDistance: 11, expReward: 46660, rankReq: 7 },
+      { id: "F",  name: "利米拉拉海溝南端", x: 850, y: 850, z: 600, surveyDurationMin: 300, surveyDistance: 11, expReward: 46660, rankReq: 7 },
+      { id: "G",  name: "傘峽", x: 260, y: 760, z: 100, surveyDurationMin: 360, surveyDistance: 11, expReward: 75920, rankReq: 10 },
+      { id: "H",  name: "俘虜島", x: 120, y: 840, z: 100, surveyDurationMin: 420, surveyDistance: 12, expReward: 102600, rankReq: 14 },
+      { id: "I",  name: "石人島", x: 380, y: 660, z: 100, surveyDurationMin: 420, surveyDistance: 12, expReward: 118350, rankReq: 17 },
+      { id: "J",  name: "無名沉船", x: 900, y: 600, z: 600, surveyDurationMin: 480, surveyDistance: 12, expReward: 146210, rankReq: 20, isGilTarget: true },
+      { id: "K",  name: "湛藍淺灘", x: 520, y: 550, z: 300, surveyDurationMin: 480, surveyDistance: 12, expReward: 146210, rankReq: 20 },
+      { id: "L",  name: "神秘海盆", x: 260, y: 570, z: 600, surveyDurationMin: 540, surveyDistance: 13, expReward: 174980, rankReq: 24 },
+      { id: "M",  name: "溺沒海4", x: 90, y: 630, z: 100, surveyDurationMin: 600, surveyDistance: 13, expReward: 200430, rankReq: 27 },
+      { id: "N",  name: "利米拉拉海溝中部", x: 800, y: 550, z: 400, surveyDurationMin: 600, surveyDistance: 13, expReward: 200430, rankReq: 27 },
+      { id: "O",  name: "探索號殘骸", x: 630, y: 490, z: 500, surveyDurationMin: 660, surveyDistance: 14, expReward: 231750, rankReq: 30, isGilTarget: true },
+      { id: "P",  name: "樹叢島", x: 290, y: 365, z: 100, surveyDurationMin: 660, surveyDistance: 14, expReward: 231750, rankReq: 30 },
+      { id: "Q",  name: "金山島", x: 115, y: 350, z: 0, surveyDurationMin: 720, surveyDistance: 14, expReward: 263530, rankReq: 34 },
+      { id: "R",  name: "海軍的秘密港口", x: 150, y: 540, z: 600, surveyDurationMin: 780, surveyDistance: 15, expReward: 292170, rankReq: 37 },
+      { id: "S",  name: "溺沒海5", x: 320, y: 230, z: 200, surveyDurationMin: 780, surveyDistance: 15, expReward: 292170, rankReq: 37 },
+      { id: "T",  name: "煉獄島", x: 130, y: 180, z: 100, surveyDurationMin: 840, surveyDistance: 15, expReward: 338330, rankReq: 40 },
+      { id: "U",  name: "溺沒海6", x: 465, y: 330, z: 100, surveyDurationMin: 840, surveyDistance: 15, expReward: 338330, rankReq: 40 },
+      { id: "V",  name: "利米拉拉海溝大傾斜", x: 555, y: 225, z: 600, surveyDurationMin: 900, surveyDistance: 16, expReward: 374020, rankReq: 44 },
+      { id: "W",  name: "溺沒海7", x: 710, y: 370, z: 300, surveyDurationMin: 900, surveyDistance: 16, expReward: 374020, rankReq: 44 },
+      { id: "X",  name: "輝砂海盆", x: 900, y: 355, z: 800, surveyDurationMin: 960, surveyDistance: 16, expReward: 406590, rankReq: 47 },
+      { id: "Y",  name: "殘照白谷", x: 210, y: 90, z: 100, surveyDurationMin: 960, surveyDistance: 16, expReward: 406590, rankReq: 47 },
+      { id: "Z",  name: "前進號的殘骸", x: 430, y: 100, z: 1000, surveyDurationMin: 1020, surveyDistance: 17, expReward: 440990, rankReq: 50 },
+      { id: "AA", name: "變理海域", x: 830, y: 210, z: 800, surveyDurationMin: 1020, surveyDistance: 17, expReward: 440990, rankReq: 50 },
+      { id: "AB", name: "利米拉拉海溝最深部", x: 750, y: 90, z: 1000, surveyDurationMin: 1020, surveyDistance: 17, expReward: 440990, rankReq: 50 },
+      { id: "AC", name: "石造寺院遺跡", x: 895, y: 100, z: 1000, surveyDurationMin: 1020, surveyDistance: 17, expReward: 440990, rankReq: 50 },
+      { id: "AD", name: "古代寶物庫", x: 595, y: 100, z: 800, surveyDurationMin: 1020, surveyDistance: 17, expReward: 440990, rankReq: 50 }
+    ]
+  },
+  jade_sea: {
+    name: "灰海",
+    start: { x: 483, y: 927, z: 0 },
+    sectors: [
+      { id: "A", name: "佐佐納恩島南端", x: 290, y: 750, z: 100, surveyDurationMin: 480, surveyDistance: 12, expReward: 440990, rankReq: 50 },
+      { id: "B", name: "風行者的殘骸", x: 150, y: 840, z: 100, surveyDurationMin: 480, surveyDistance: 12, expReward: 440990, rankReq: 50 },
+      { id: "C", name: "佐佐納恩島北端", x: 280, y: 570, z: 100, surveyDurationMin: 540, surveyDistance: 13, expReward: 480270, rankReq: 54 },
+      { id: "D", name: "灰海1", x: 430, y: 660, z: 300, surveyDurationMin: 540, surveyDistance: 13, expReward: 480270, rankReq: 54 },
+      { id: "E", name: "火葬爐海溝南端", x: 590, y: 750, z: 600, surveyDurationMin: 600, surveyDistance: 14, expReward: 522300, rankReq: 57 },
+      { id: "F", name: "灰海2", x: 180, y: 440, z: 300, surveyDurationMin: 600, surveyDistance: 14, expReward: 522300, rankReq: 57 },
+      { id: "G", name: "灰海3", x: 350, y: 480, z: 300, surveyDurationMin: 660, surveyDistance: 15, expReward: 548410, rankReq: 60 },
+      { id: "H", name: "修道士墓碑", x: 340, y: 330, z: 600, surveyDurationMin: 660, surveyDistance: 15, expReward: 548410, rankReq: 60 },
+      { id: "I", name: "火葬爐海溝中部", x: 500, y: 580, z: 600, surveyDurationMin: 660, surveyDistance: 15, expReward: 548410, rankReq: 60 },
+      { id: "J", name: "神父的岩窟", x: 460, y: 420, z: 600, surveyDurationMin: 660, surveyDistance: 15, expReward: 548410, rankReq: 60 },
+      { id: "K", name: "灰海4", x: 140, y: 310, z: 300, surveyDurationMin: 660, surveyDistance: 15, expReward: 548410, rankReq: 60 },
+      { id: "L", name: "砂礫海盆", x: 440, y: 200, z: 600, surveyDurationMin: 720, surveyDistance: 16, expReward: 595020, rankReq: 63 },
+      { id: "M", name: "單只手套島", x: 820, y: 550, z: 100, surveyDurationMin: 720, surveyDistance: 16, expReward: 595020, rankReq: 63, isGilTarget: true },
+      { id: "N", name: "破洞襪子島", x: 870, y: 400, z: 100, surveyDurationMin: 780, surveyDistance: 17, expReward: 645590, rankReq: 65, isGilTarget: true },
+      { id: "O", name: "走私客的交易場", x: 760, y: 660, z: 300, surveyDurationMin: 780, surveyDistance: 17, expReward: 645590, rankReq: 65, isGilTarget: true },
+      { id: "P", name: "磨破袍子島", x: 584, y: 195, z: 100, surveyDurationMin: 780, surveyDistance: 20, expReward: 645590, rankReq: 65, isGilTarget: true },
+      { id: "Q", name: "商貿神的煙管", x: 761, y: 885, z: 600, surveyDurationMin: 800, surveyDistance: 20, expReward: 661730, rankReq: 66, isGilTarget: true },
+      { id: "R", name: "走錨海域", x: 818, y: 145, z: 400, surveyDurationMin: 820, surveyDistance: 21, expReward: 678274, rankReq: 67 },
+      { id: "S", name: "貪婪胃", x: 680, y: 285, z: 300, surveyDurationMin: 860, surveyDistance: 21, expReward: 712612, rankReq: 69 },
+      { id: "T", name: "藍洞", x: 168, y: 140, z: 600, surveyDurationMin: 880, surveyDistance: 22, expReward: 730428, rankReq: 70 }
+    ]
+  }
+};
+
+const DEFAULT_WORKSHOPS = [];
 
 // Load Data from LocalStorage
 function loadData() {
@@ -210,11 +220,10 @@ function loadData() {
             workshops = JSON.parse(data);
         } catch (e) {
             console.error("Error parsing localStorage data, resetting to default...", e);
-            workshops = JSON.parse(JSON.stringify(DEFAULT_WORKSHOPS));
+            workshops = [];
         }
     } else {
-        workshops = JSON.parse(JSON.stringify(DEFAULT_WORKSHOPS));
-        saveData();
+        workshops = [];
     }
 
     // Ensure every workshop has the charts progress object for backward compatibility
@@ -296,6 +305,20 @@ function playTestSound() {
 function renderAllWorkshops() {
     const container = document.getElementById("workshops-container");
     container.innerHTML = "";
+
+    if (workshops.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state-card" style="text-align: center; padding: 48px 20px; background: rgba(15,13,12,0.85); border: 1px dashed var(--ff-border-gold); border-radius: 6px; grid-column: 1 / -1; width: 100%; box-sizing: border-box;">
+                <div style="font-size: 40px; color: var(--ff-text-gold); margin-bottom: 12px;"><i class="fa-solid fa-anchor"></i></div>
+                <h3 style="color: var(--ff-text-gold); font-size: 18px; margin-bottom: 8px;">歡迎使用 FFXIV 潛水艇/飛空艇計時與航線推薦工具</h3>
+                <p style="color: var(--ff-text-gray); font-size: 13px; margin-bottom: 20px;">目前尚無部隊工坊，請點擊上方按鈕建立您的第一個部隊工坊，或開啟航線推薦規劃出航！</p>
+                <button class="ff-btn btn-primary" onclick="openAddWorkshopModal()" style="padding: 10px 24px; font-size: 14px;">
+                    <i class="fa-solid fa-plus"></i> 立即新增部隊工坊
+                </button>
+            </div>
+        `;
+        return;
+    }
 
     workshops.forEach((ws, wsIdx) => {
         const card = document.createElement("div");
@@ -1318,4 +1341,490 @@ function calculateSubStats() {
     document.getElementById("stat-val-speed").textContent = speed;
     document.getElementById("stat-val-range").textContent = range;
     document.getElementById("stat-val-favor").textContent = favor;
+}
+
+/* ==========================================================================
+   Work Item 05: Smart Route Recommender System
+   ========================================================================== */
+
+function calculate3DDistance(p1, p2) {
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+    const dz = p1.z - p2.z;
+    return Math.floor(Math.sqrt(dx * dx + dy * dy + dz * dz) / 10);
+}
+
+function evaluateRoute(sectorList, chartData, speed) {
+    if (!sectorList || sectorList.length === 0) return null;
+    const safeSpeed = Math.max(1, speed || 100);
+    const start = chartData.start;
+    let totalTravelMinutes = 0;
+    let totalSurveyMinutes = 0;
+    let totalRangeCost = 0;
+    let totalExp = 0;
+    let maxRankReq = 1;
+    let gilTargetCount = 0;
+
+    // 1. Home to First Sector
+    const distToFirst = calculate3DDistance(start, sectorList[0]);
+    totalTravelMinutes += Math.floor((distToFirst * 39.9) / safeSpeed);
+    totalRangeCost += distToFirst;
+    
+    // In FFXIV, Survey Time is also reduced by Speed: (baseSurveyMin * 120 / speed)
+    const sTime0 = Math.floor((sectorList[0].surveyDurationMin * 120) / safeSpeed);
+    totalSurveyMinutes += sTime0;
+    totalExp += sectorList[0].expReward;
+    maxRankReq = Math.max(maxRankReq, sectorList[0].rankReq || 1);
+    if (sectorList[0].isGilTarget) gilTargetCount++;
+
+    // 2. Intermediate legs
+    for (let i = 0; i < sectorList.length - 1; i++) {
+        const legDist = calculate3DDistance(sectorList[i], sectorList[i + 1]);
+        totalTravelMinutes += Math.floor((legDist * 39.9) / safeSpeed);
+        totalRangeCost += legDist;
+        
+        const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * 120) / safeSpeed);
+        totalSurveyMinutes += sTime;
+        totalExp += sectorList[i + 1].expReward;
+        if (sectorList[i + 1].rankReq > maxRankReq) maxRankReq = sectorList[i + 1].rankReq;
+        if (sectorList[i + 1].isGilTarget) gilTargetCount++;
+    }
+
+    // 3. Return leg from last sector back to Home
+    const lastSector = sectorList[sectorList.length - 1];
+    const distToHome = calculate3DDistance(lastSector, start);
+    totalTravelMinutes += Math.floor((distToHome * 39.9) / safeSpeed);
+
+    const totalMinutes = totalTravelMinutes + totalSurveyMinutes;
+    const expPerMin = totalMinutes > 0 ? Math.round(totalExp / totalMinutes) : 0;
+
+    return {
+        sectors: [...sectorList],
+        totalRangeCost,
+        totalTravelMinutes,
+        totalSurveyMinutes,
+        totalMinutes,
+        totalExp,
+        maxRankReq,
+        gilTargetCount,
+        expPerMin
+    };
+}
+
+function openRoutePlannerModal() {
+    const select = document.getElementById("route-ws-select");
+    if (select) {
+        select.innerHTML = "";
+        if (workshops.length === 0) {
+            const opt = document.createElement("option");
+            opt.value = "-1";
+            opt.textContent = "全海圖搜尋 (未建立工坊)";
+            select.appendChild(opt);
+        } else {
+            workshops.forEach((ws, idx) => {
+                const opt = document.createElement("option");
+                opt.value = idx;
+                opt.textContent = `${ws.name} (${ws.submersibles.length} 艘)`;
+                select.appendChild(opt);
+            });
+        }
+    }
+
+    // Initialize level and parts dropdowns
+    initRoutePartDropdowns();
+    updateRouteSubStats();
+
+    openModal("route-modal");
+    runRouteSearch();
+}
+
+function initRoutePartDropdowns() {
+    const levelInput = document.getElementById("route-level");
+    const level = parseInt(levelInput ? levelInput.value : "50") || 50;
+    const parts = ["hull", "stern", "bow", "bridge"];
+
+    // Default 1121 configuration (鯊魚, 鯊魚, 甲鱟, 鯊魚)
+    const defaults = { hull: "鯊魚級", stern: "鯊魚級", bow: "甲鱟級", bridge: "鯊魚級" };
+
+    parts.forEach(partKey => {
+        const select = document.getElementById(`route-${partKey}`);
+        if (!select) return;
+        const prevValue = select.value || defaults[partKey];
+
+        select.innerHTML = "";
+        const partConfig = PART_STATS[partKey];
+        for (const name in partConfig) {
+            const item = partConfig[name];
+            if (item.minLevel <= level) {
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = `${getPartPrefix(name)}${name}`;
+                select.appendChild(opt);
+            }
+        }
+
+        if (prevValue && partConfig[prevValue] && partConfig[prevValue].minLevel <= level) {
+            select.value = prevValue;
+        } else if (defaults[partKey] && partConfig[defaults[partKey]] && partConfig[defaults[partKey]].minLevel <= level) {
+            select.value = defaults[partKey];
+        }
+    });
+}
+
+function onRouteLevelChange() {
+    initRoutePartDropdowns();
+    updateRouteSubStats();
+    runRouteSearch();
+}
+
+function onRoutePartChange() {
+    updateRouteSubStats();
+    runRouteSearch();
+}
+
+function updateRouteSubStats() {
+    const levelInput = document.getElementById("route-level");
+    const level = parseInt(levelInput ? levelInput.value : "50") || 50;
+
+    const hull = (document.getElementById("route-hull") && document.getElementById("route-hull").value) || "鯊魚級";
+    const stern = (document.getElementById("route-stern") && document.getElementById("route-stern").value) || "鯊魚級";
+    const bow = (document.getElementById("route-bow") && document.getElementById("route-bow").value) || "甲鱟級";
+    const bridge = (document.getElementById("route-bridge") && document.getElementById("route-bridge").value) || "鯊魚級";
+
+    const defaultStats = [0, 0, 0, 0, 0];
+    const hStats = (PART_STATS.hull[hull] && PART_STATS.hull[hull].stats) || defaultStats;
+    const sStats = (PART_STATS.stern[stern] && PART_STATS.stern[stern].stats) || defaultStats;
+    const bStats = (PART_STATS.bow[bow] && PART_STATS.bow[bow].stats) || defaultStats;
+    const brStats = (PART_STATS.bridge[bridge] && PART_STATS.bridge[bridge].stats) || defaultStats;
+
+    const lvlBonus = (level >= 51 && LEVEL_BONUS[level]) ? LEVEL_BONUS[level] : defaultStats;
+
+    const surveillance = hStats[0] + sStats[0] + bStats[0] + brStats[0] + lvlBonus[0];
+    const retrieval = hStats[1] + sStats[1] + bStats[1] + brStats[1] + lvlBonus[1];
+    const speed = hStats[2] + sStats[2] + bStats[2] + brStats[2] + lvlBonus[2];
+    const range = hStats[3] + sStats[3] + bStats[3] + brStats[3] + lvlBonus[3];
+    const favor = hStats[4] + sStats[4] + bStats[4] + brStats[4] + lvlBonus[4];
+
+    // Update mini stat badges in route modal
+    const sEl = document.getElementById("route-badge-surveillance");
+    const retEl = document.getElementById("route-badge-retrieval");
+    const spdEl = document.getElementById("route-badge-speed");
+    const rngEl = document.getElementById("route-badge-range");
+    const favEl = document.getElementById("route-badge-favor");
+
+    if (sEl) sEl.textContent = surveillance;
+    if (retEl) retEl.textContent = retrieval;
+    if (spdEl) spdEl.textContent = speed;
+    if (rngEl) rngEl.textContent = range;
+    if (favEl) favEl.textContent = favor;
+
+    return { surveillance, retrieval, speed, range, favor };
+}
+
+function runRouteSearch() {
+    const wsIdx = parseInt(document.getElementById("route-ws-select") ? document.getElementById("route-ws-select").value : "0") || 0;
+    const chartKey = (document.getElementById("route-chart-select") && document.getElementById("route-chart-select").value) || "drowned_city";
+    const objective = (document.getElementById("route-objective") && document.getElementById("route-objective").value) || "exp";
+    const targetHours = parseFloat(document.getElementById("route-target-time") ? document.getElementById("route-target-time").value : "999") || 999;
+
+    const stats = updateRouteSubStats();
+    const rangeLimit = stats.range;
+    const speed = stats.speed;
+
+    const summaryEl = document.getElementById("route-search-summary");
+    const container = document.getElementById("route-results-container");
+    if (!container) return;
+
+    container.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--ff-text-gray);"><i class="fa-solid fa-spinner fa-spin"></i> 正在演算最佳航線...</div>`;
+
+    setTimeout(() => {
+        const results = searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit, speed);
+        renderRouteResults(results, rangeLimit, speed, objective, chartKey);
+    }, 15);
+}
+
+function searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit, speed) {
+    const chartData = SECTOR_DATABASE[chartKey];
+    if (!chartData) return [];
+
+    let unlockedIds;
+    if (wsIdx >= 0 && workshops[wsIdx]) {
+        const ws = workshops[wsIdx];
+        unlockedIds = (ws.charts && ws.charts[chartKey]) ? ws.charts[chartKey] : (CHART_CONFIGS[chartKey] ? CHART_CONFIGS[chartKey].startsUnlocked : ["A"]);
+    } else {
+        // First-time visitors without any workshops created can search all sectors freely
+        unlockedIds = chartData.sectors.map(s => s.id);
+    }
+
+    // Filter available sectors that user has unlocked
+    const availableSectors = chartData.sectors.filter(s => unlockedIds.includes(s.id));
+    if (availableSectors.length === 0) return [];
+
+    const maxMinutes = targetHours * 60;
+    const validRoutes = [];
+
+    // Precalculate distance matrix between available sectors to sort neighbors by distance
+    const start = chartData.start;
+    const distanceMatrix = {};
+    availableSectors.forEach(s1 => {
+        distanceMatrix[s1.id] = {
+            distStart: calculate3DDistance(start, s1),
+            neighbors: availableSectors
+                .filter(s2 => s2.id !== s1.id)
+                .map(s2 => ({ sector: s2, dist: calculate3DDistance(s1, s2) }))
+                .sort((a, b) => a.dist - b.dist)
+        };
+    });
+
+    function search(currentRoute, visitedSet, currentRange, currentMinutes) {
+        const len = currentRoute.length;
+        if (len >= 1) {
+            const evalRes = evaluateRoute(currentRoute, chartData, speed);
+            if (evalRes.totalRangeCost > rangeLimit) return;
+            if (evalRes.totalMinutes <= maxMinutes) {
+                let score = 0;
+                if (objective === "gil") {
+                    // Heavily prioritize routes visiting gold/salvaged targets (e.g. O, J)
+                    score = (evalRes.gilTargetCount * 100000);
+                    // Time fullness bonus: if time limited, reward routes utilizing the window
+                    if (targetHours <= 48) {
+                        const timeRatio = evalRes.totalMinutes / maxMinutes;
+                        score += timeRatio * 5000;
+                    }
+                    score += evalRes.expPerMin * 10;
+                } else {
+                    // EXP maximization: sort by EXP per minute (gold standard)
+                    if (targetHours <= 48) {
+                        score = evalRes.totalExp + (evalRes.expPerMin * 100);
+                    } else {
+                        score = evalRes.expPerMin * 1000 + evalRes.totalExp;
+                    }
+                }
+
+                validRoutes.push({
+                    ...evalRes,
+                    score
+                });
+            }
+        }
+
+        if (len >= 5) return;
+
+        // Neighbor branching: pick top 8 closest unvisited neighbors
+        const last = currentRoute[len - 1];
+        const neighbors = last ? distanceMatrix[last.id].neighbors : availableSectors.map(s => ({ sector: s, dist: distanceMatrix[s.id].distStart })).sort((a, b) => a.dist - b.dist);
+
+        const candidates = neighbors.slice(0, 8);
+
+        for (let i = 0; i < candidates.length; i++) {
+            const nextSector = candidates[i].sector;
+            if (!visitedSet.has(nextSector.id)) {
+                if (currentMinutes + nextSector.surveyDurationMin > maxMinutes) continue;
+
+                visitedSet.add(nextSector.id);
+                currentRoute.push(nextSector);
+                search(currentRoute, visitedSet, currentRange + candidates[i].dist, currentMinutes + nextSector.surveyDurationMin);
+                currentRoute.pop();
+                visitedSet.delete(nextSector.id);
+            }
+        }
+    }
+
+    // Launch search from available sectors
+    for (const startSector of availableSectors) {
+        search([startSector], new Set([startSector.id]), distanceMatrix[startSector.id].distStart, startSector.surveyDurationMin);
+    }
+
+    // Sort descending by score
+    validRoutes.sort((a, b) => b.score - a.score);
+
+    // Keep top 5 distinct routes
+    const topRoutes = [];
+    const seenSignatures = new Set();
+
+    for (const r of validRoutes) {
+        const sig = r.sectors.map(s => s.id).join("-");
+        if (!seenSignatures.has(sig)) {
+            seenSignatures.add(sig);
+            topRoutes.push(r);
+            if (topRoutes.length >= 5) break;
+        }
+    }
+
+    return topRoutes;
+}
+
+function renderRouteResults(routes, rangeLimit, speed, objective, chartKey) {
+    const container = document.getElementById("route-results-container");
+    const summaryEl = document.getElementById("route-search-summary");
+    if (!container) return;
+
+    const chartName = (SECTOR_DATABASE[chartKey] && SECTOR_DATABASE[chartKey].name) || "海域";
+    const chartMapNum = chartKey === "drowned_city" ? "1" : "2";
+
+    if (!routes || routes.length === 0) {
+        if (summaryEl) summaryEl.textContent = "未找到符合條件之航線";
+        container.innerHTML = `
+            <div style="text-align: center; padding: 28px 12px; color: var(--ff-text-gray);">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 24px; color: #ffaa33; margin-bottom: 8px;"></i>
+                <div>在當前「航距上限 (${rangeLimit})」或「作息時長」限制下，沒有找到合法航線。</div>
+                <div style="font-size: 11px; margin-top: 6px;">請嘗試提高等級或更換部件以增加航行距離 (Range)。</div>
+            </div>
+        `;
+        return;
+    }
+
+    if (summaryEl) summaryEl.textContent = `共篩選出 ${routes.length} 條最佳航線推薦`;
+    container.innerHTML = "";
+
+    routes.forEach((route, idx) => {
+        const card = document.createElement("div");
+        card.className = "route-card";
+
+        // Format duration into days + hours + mins
+        const days = Math.floor(route.totalMinutes / (24 * 60));
+        const remMins = route.totalMinutes % (24 * 60);
+        const hours = Math.floor(remMins / 60);
+        const mins = remMins % 60;
+        let durationStr = "";
+        if (days > 0) {
+            durationStr = `${days}天${hours}小時${mins.toString().padStart(2, "0")}分`;
+        } else {
+            durationStr = `${hours}小時${mins.toString().padStart(2, "0")}分`;
+        }
+
+        // Calculate estimated return string
+        const returnTimestamp = Date.now() + (route.totalMinutes * 60 * 1000);
+        const returnDate = new Date(returnTimestamp);
+        const returnDateStr = `${returnDate.getMonth() + 1}/${returnDate.getDate()} ${returnDate.getHours().toString().padStart(2, '0')}:${returnDate.getMinutes().toString().padStart(2, '0')}`;
+
+        // Build nodes HTML
+        let nodesHTML = "";
+        route.sectors.forEach((sec, sIdx) => {
+            const isGil = sec.isGilTarget ? "gil-target" : "";
+            nodesHTML += `<span class="route-node-pill ${isGil}" title="${sec.id} - ${sec.name}">${sec.id}</span>`;
+            if (sIdx < route.sectors.length - 1) {
+                nodesHTML += `<i class="fa-solid fa-chevron-right route-arrow"></i>`;
+            }
+        });
+
+        // Top right highlight
+        let topRightHTML = "";
+        if (objective === "gil" && route.gilTargetCount > 0) {
+            topRightHTML = `<span class="route-pill-item gil"><i class="fa-solid fa-coins"></i> 沉船金飾 ×${route.gilTargetCount}</span>`;
+        } else {
+            topRightHTML = `<span class="route-exp-per-min">EXP/分 ${route.expPerMin.toLocaleString()}</span>`;
+        }
+
+        card.innerHTML = `
+            <div class="route-card-left">
+                <div class="route-card-top-row">
+                    <div class="route-path-flow">
+                        <span class="route-rank-badge">#${idx + 1} (${chartMapNum}) ${chartName}</span>
+                        <span class="route-map-tag">${chartName}</span>
+                        ${nodesHTML}
+                    </div>
+                    <div>${topRightHTML}</div>
+                </div>
+                <div class="route-pills-row">
+                    <span class="route-pill-item">等級需求 ≥ ${route.maxRankReq}</span>
+                    <span class="route-pill-item">總經驗 <strong>${route.totalExp.toLocaleString()}</strong></span>
+                    <span class="route-pill-item duration">耗時 <strong>${durationStr}</strong></span>
+                    <span class="route-pill-item return-time">預估回港 ${returnDateStr}</span>
+                    <span class="route-pill-item">航行距離 <strong>${route.totalRangeCost}</strong> / ${rangeLimit}</span>
+                    <span class="route-pill-item">站數 ${route.sectors.length}</span>
+                </div>
+            </div>
+            <div class="route-card-right">
+                <button class="ff-btn btn-primary route-apply-btn" onclick="applyRouteToModal(${route.totalMinutes})">
+                    <i class="fa-solid fa-paper-plane"></i> 帶入鬧鐘
+                </button>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+function applyRouteToModal(totalMinutes) {
+    if (workshops.length === 0) {
+        alert("您尚未建立任何部隊工坊！請先點擊上方「新增部隊工坊」建立工坊與潛水艇，即可將航線直接套用至機體開始倒數。");
+        closeModal("route-modal");
+        openAddWorkshopModal();
+        return;
+    }
+    const wsIdx = parseInt(document.getElementById("route-ws-select") ? document.getElementById("route-ws-select").value : "0") || 0;
+    const ws = workshops[wsIdx] || workshops[0];
+    if (!ws) return;
+
+    // Format duration
+    const days = Math.floor(totalMinutes / (24 * 60));
+    const remMins = totalMinutes % (24 * 60);
+    const hours = Math.floor(remMins / 60);
+    const mins = remMins % 60;
+    let durStr = days > 0 ? `${days}天${hours}小時${mins}分` : `${hours}小時${mins}分`;
+
+    const infoEl = document.getElementById("route-dispatch-info");
+    if (infoEl) {
+        infoEl.innerHTML = `<strong>【${ws.name}】</strong> 預計出航時長：<strong style="color: #ffa726;">${durStr}</strong><br><small style="color: var(--ff-text-gray);">請選擇要帶入此探索時長開始倒數的潛水艇：</small>`;
+    }
+
+    const subListEl = document.getElementById("route-dispatch-sub-list");
+    if (subListEl) {
+        subListEl.innerHTML = "";
+        ws.submersibles.forEach((sub, subIdx) => {
+            const row = document.createElement("div");
+            row.className = "route-dispatch-sub-row";
+
+            let statusTag = "";
+            if (sub.status === "探索中") {
+                statusTag = `<span class="sub-status-tag status-running" style="color: #ffa726;">(探索中)</span>`;
+            } else if (sub.status === "已返航") {
+                statusTag = `<span class="sub-status-tag status-returned" style="color: var(--ff-text-green);">(已返航)</span>`;
+            } else {
+                statusTag = `<span class="sub-status-tag" style="color: var(--ff-text-gray);">(待命中)</span>`;
+            }
+
+            row.innerHTML = `
+                <div>
+                    <span class="route-dispatch-sub-name"><i class="fa-solid fa-ship gold-icon" style="margin-right: 6px;"></i> ${sub.name}</span>
+                    <span class="route-dispatch-sub-status">Lv.${sub.level} ${statusTag}</span>
+                </div>
+                <button class="ff-btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="dispatchSubmersibleWithRoute(${wsIdx}, ${subIdx}, ${totalMinutes})">
+                    <i class="fa-solid fa-paper-plane"></i> 套用出航
+                </button>
+            `;
+            subListEl.appendChild(row);
+        });
+    }
+
+    openModal("route-dispatch-modal");
+}
+
+function dispatchSubmersibleWithRoute(wsIdx, subIdx, totalMinutes) {
+    const ws = workshops[wsIdx];
+    if (!ws || !ws.submersibles[subIdx]) return;
+
+    const sub = ws.submersibles[subIdx];
+    const totalMs = totalMinutes * 60 * 1000;
+
+    sub.status = "探索中";
+    sub.totalDurationMs = totalMs;
+    sub.targetTimestamp = Date.now() + totalMs;
+    sub.alarmPlayed = false;
+
+    saveData();
+    renderAllWorkshops();
+
+    closeModal("route-dispatch-modal");
+    closeModal("route-modal");
+
+    // Format duration
+    const days = Math.floor(totalMinutes / (24 * 60));
+    const remMins = totalMinutes % (24 * 60);
+    const hours = Math.floor(remMins / 60);
+    const mins = remMins % 60;
+    const durStr = days > 0 ? `${days}天${hours}小時${mins}分` : `${hours}小時${mins}分`;
+
+    alert(`已成功將航線時長 (${durStr}) 套用至【${ws.name}】的「${sub.name}」，已開始探索倒數！`);
 }
