@@ -1357,7 +1357,11 @@ function calculateMapDistance(p1, p2, chartKey) {
         return moveDist + surveyDist;
     }
     const dz = p1.z - p2.z;
-    return Math.floor(Math.sqrt(dx * dx + dy * dy + dz * dz) / 10);
+    const rawDist = Math.floor(Math.sqrt(dx * dx + dy * dy + dz * dz) / 10);
+    if (rawDist === 0 && p2.surveyDistance) {
+        return p2.surveyDistance;
+    }
+    return rawDist;
 }
 
 function evaluateRoute(sectorList, chartData, speed, chartKey) {
@@ -1387,7 +1391,9 @@ function evaluateRoute(sectorList, chartData, speed, chartKey) {
     // 2. Intermediate legs
     for (let i = 0; i < sectorList.length - 1; i++) {
         const legDist = calculateMapDistance(sectorList[i], sectorList[i + 1], chartKey);
-        totalTravelMinutes += Math.floor((legDist * moveFactor) / safeSpeed);
+        const isAdjacentSameSpot = sectorList[i + 1].surveyDistance && (legDist === sectorList[i + 1].surveyDistance);
+        const legMoveDist = isAdjacentSameSpot ? 0 : legDist;
+        totalTravelMinutes += Math.floor((legMoveDist * moveFactor) / safeSpeed);
         totalRangeCost += legDist;
         
         const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * 70) / safeSpeed);
