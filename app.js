@@ -1595,18 +1595,20 @@ function searchOptimalRoutes(wsIdx, chartKey, objective, targetHours, rangeLimit
                 if (objective === "gil") {
                     // Heavily prioritize routes visiting gold/salvaged targets (e.g. O, J)
                     score = (evalRes.gilTargetCount * 100000);
-                    // Time fullness bonus: if time limited, reward routes utilizing the window
                     if (targetHours <= 48) {
                         const timeRatio = evalRes.totalMinutes / maxMinutes;
                         score += timeRatio * 5000;
                     }
                     score += evalRes.expPerMin * 10;
+                } else if (objective === "total_exp") {
+                    // Pure Total EXP maximization (Highest total EXP brought home per trip)
+                    score = (evalRes.totalExp * 1000) + evalRes.expPerMin;
                 } else {
-                    // EXP maximization: sort by EXP per minute (gold standard)
+                    // EXP efficiency maximization (Highest EXP earned per minute)
                     if (targetHours <= 48) {
                         score = evalRes.totalExp + (evalRes.expPerMin * 100);
                     } else {
-                        score = evalRes.expPerMin * 1000 + evalRes.totalExp;
+                        score = (evalRes.expPerMin * 10000) + evalRes.totalExp;
                     }
                 }
 
