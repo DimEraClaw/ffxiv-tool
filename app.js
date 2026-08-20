@@ -1723,8 +1723,8 @@ function renderRouteResults(routes, rangeLimit, speed, objective, chartKey) {
             <div class="route-card-left">
                 <div class="route-card-top-row">
                     <div class="route-path-flow">
-                        <span class="route-rank-badge">#${idx + 1} (${chartMapNum}) ${chartName}</span>
-                        <span class="route-map-tag">${chartName}</span>
+                        <span class="route-rank-badge">#${idx + 1}</span>
+                        <span class="route-map-tag">(${chartMapNum}) ${chartName}</span>
                         ${nodesHTML}
                     </div>
                     <div>${topRightHTML}</div>
