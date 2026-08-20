@@ -84,7 +84,7 @@ const LEVEL_BONUS = {
   59: [5,8,4,9,3],   60: [5,10,5,10,5], 61: [7,10,6,10,6], 62: [7,10,8,12,7],
   63: [8,11,8,12,9], 64: [8,12,10,14,9],65: [10,15,10,15,10],66:[13,17,11,15,10],
   67: [13,19,13,17,12],68:[16,19,15,17,12],69:[16,23,15,19,13],70:[20,25,15,20,13],
-  71: [23,29,15,20,15],72:[26,29,15,20,15],73:[26,33,17,22,17],74:[26,35,18,23,19],
+  71: [23,29,15,20,15],72:[26,29,15,22,15],73:[26,33,17,22,17],74:[26,35,18,23,19],
   75: [30,40,20,23,20],76:[30,45,20,23,24],77:[34,45,23,29,25],78:[36,45,23,29,27],
   79: [38,45,25,33,28],80:[40,50,25,35,28],81:[40,50,25,35,30],82:[42,50,32,40,34],
   83: [43,53,32,40,35],84:[44,53,32,49,38],85:[48,58,33,49,39],86:[50,58,36,49,43],
@@ -1372,12 +1372,13 @@ function evaluateRoute(sectorList, chartData, speed, chartKey) {
     let maxRankReq = 1;
     let gilTargetCount = 0;
 
-    // Survey factor: Map 1 (16730) vs Map 2+ (7015)
-    const surveyFactor = isMap1 ? 16730 : 7015;
+    // Factors by map
+    const surveyFactor = isMap1 ? 16730 : 4142;
+    const moveFactor = isMap1 ? 39.9 : 1177.5;
 
     // 1. Home to First Sector
     const distToFirst = calculateMapDistance(start, sectorList[0], chartKey);
-    totalTravelMinutes += Math.floor((distToFirst * 39.9) / safeSpeed);
+    totalTravelMinutes += Math.floor((distToFirst * moveFactor) / safeSpeed);
     totalRangeCost += distToFirst;
     
     const sTime0 = Math.floor((sectorList[0].surveyDurationMin * surveyFactor) / (safeSpeed * 60));
@@ -1389,7 +1390,7 @@ function evaluateRoute(sectorList, chartData, speed, chartKey) {
     // 2. Intermediate legs
     for (let i = 0; i < sectorList.length - 1; i++) {
         const legDist = calculateMapDistance(sectorList[i], sectorList[i + 1], chartKey);
-        totalTravelMinutes += Math.floor((legDist * 39.9) / safeSpeed);
+        totalTravelMinutes += Math.floor((legDist * moveFactor) / safeSpeed);
         totalRangeCost += legDist;
         
         const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * surveyFactor) / (safeSpeed * 60));
@@ -1402,10 +1403,10 @@ function evaluateRoute(sectorList, chartData, speed, chartKey) {
     // 3. Return leg from last sector back to Home
     const lastSector = sectorList[sectorList.length - 1];
     const distToHome = calculateMapDistance(lastSector, start, chartKey);
-    totalTravelMinutes += Math.floor((distToHome * 39.9) / safeSpeed);
+    totalTravelMinutes += Math.floor((distToHome * moveFactor) / safeSpeed);
 
     // Range calibration
-    const calibratedRangeCost = isMap1 ? totalRangeCost : (totalRangeCost + Math.floor(sectorList.length * 0.6));
+    const calibratedRangeCost = isMap1 ? totalRangeCost : totalRangeCost;
 
     const totalMinutes = totalTravelMinutes + totalSurveyMinutes;
     const expPerMin = totalMinutes > 0 ? Math.round(totalExp / totalMinutes) : 0;
