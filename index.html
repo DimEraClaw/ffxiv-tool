@@ -25,6 +25,9 @@
                 <button class="ff-btn btn-secondary" onclick="toggleSettings()" title="音效設定">
                     <i class="fa-solid fa-gear"></i> 音效設定
                 </button>
+                <button class="ff-btn btn-primary" onclick="openStatsCalculator()" title="船艦屬性計算器">
+                    <i class="fa-solid fa-calculator"></i> 屬性計算器
+                </button>
                 <button class="ff-btn btn-primary" onclick="openAddWorkshopModal()">
                     <i class="fa-solid fa-plus"></i> 新增部隊工坊
                 </button>
@@ -159,6 +162,112 @@
             <div class="dialog-footer" style="justify-content: center; padding-top: 14px;">
                 <button class="ff-btn btn-warning" onclick="dismissAlarm()" style="width: 100%; padding: 12px; font-size: 14px;">
                     <i class="fa-solid fa-volume-xmark"></i> 關閉鬧鐘提示音
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Chart Site Unlock Tracker -->
+    <div id="chart-modal" class="modal-overlay">
+        <div class="ff-dialog dialog-large">
+            <div class="card-border-frame">
+                <div class="ff-corner ff-corner-tl"></div>
+                <div class="ff-corner ff-corner-tr"></div>
+                <div class="ff-corner ff-corner-bl"></div>
+                <div class="ff-corner ff-corner-br"></div>
+            </div>
+            <h3 class="dialog-title" id="chart-modal-title">海圖解鎖進度</h3>
+            <div class="dialog-body">
+                <input type="hidden" id="chart-modal-ws-idx">
+                <input type="hidden" id="chart-modal-chart-key">
+                
+                <!-- Bulk Actions -->
+                <div class="modal-bulk-actions" style="display: flex; gap: 12px; justify-content: flex-end; margin-bottom: 8px;">
+                    <button class="ff-btn btn-secondary" onclick="chartBulkAction('all')" style="padding: 6px 12px; font-size: 12px;">全選</button>
+                    <button class="ff-btn btn-secondary" onclick="chartBulkAction('clear')" style="padding: 6px 12px; font-size: 12px;">全清</button>
+                </div>
+                
+                <!-- Sites Grid -->
+                <div class="sites-grid" id="chart-sites-container">
+                    <!-- Site toggle buttons will be generated dynamically -->
+                </div>
+            </div>
+            <div class="dialog-footer" style="justify-content: center; padding-top: 14px;">
+                <button class="ff-btn btn-primary" onclick="closeChartModal()" style="width: 100%; padding: 12px; font-size: 14px;">
+                    確定 / 關閉
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Submersible Stats Calculator -->
+    <div id="stats-modal" class="modal-overlay">
+        <div class="ff-dialog dialog-large">
+            <div class="card-border-frame">
+                <div class="ff-corner ff-corner-tl"></div>
+                <div class="ff-corner ff-corner-tr"></div>
+                <div class="ff-corner ff-corner-bl"></div>
+                <div class="ff-corner ff-corner-br"></div>
+            </div>
+            <h3 class="dialog-title"><i class="fa-solid fa-calculator gold-icon" style="margin-right: 8px;"></i> 船艦屬性計算器</h3>
+            <div class="dialog-body">
+                <div class="calc-container">
+                    <!-- Left Column: Inputs -->
+                    <div class="calc-inputs-column">
+                        <div class="form-group">
+                            <label for="calc-level"><i class="fa-solid fa-star gold-icon"></i> 潛水艇等級 (Lv. 1～95)：</label>
+                            <select id="calc-level" class="ff-select" onchange="onCalcLevelChange()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calc-hull"><i class="fa-solid fa-circle-nodes gold-icon"></i> 船體 (Hull)：</label>
+                            <select id="calc-hull" class="ff-select" onchange="calculateSubStats()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calc-stern"><i class="fa-solid fa-circle-nodes gold-icon"></i> 船尾 (Stern)：</label>
+                            <select id="calc-stern" class="ff-select" onchange="calculateSubStats()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calc-bow"><i class="fa-solid fa-circle-nodes gold-icon"></i> 船首 (Bow)：</label>
+                            <select id="calc-bow" class="ff-select" onchange="calculateSubStats()"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="calc-bridge"><i class="fa-solid fa-circle-nodes gold-icon"></i> 艦橋 (Bridge)：</label>
+                            <select id="calc-bridge" class="ff-select" onchange="calculateSubStats()"></select>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Outputs -->
+                    <div class="calc-outputs-column">
+                        <div class="stats-display-card">
+                            <div class="stats-card-title">最終潛艇性能</div>
+                            
+                            <div class="stat-row">
+                                <span class="stat-name">探索性能 <small>Surveillance</small></span>
+                                <span class="stat-val" id="stat-val-surveillance">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">收集性能 <small>Retrieval</small></span>
+                                <span class="stat-val" id="stat-val-retrieval">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">巡航速度 <small>Speed</small></span>
+                                <span class="stat-val" id="stat-val-speed">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">航行距離 <small>Range</small></span>
+                                <span class="stat-val" id="stat-val-range">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">恩惠 <small>Favor</small></span>
+                                <span class="stat-val" id="stat-val-favor">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer" style="justify-content: center; padding-top: 14px;">
+                <button class="ff-btn btn-secondary" onclick="closeModal('stats-modal')" style="width: 100%; padding: 12px; font-size: 14px;">
+                    關閉視窗
                 </button>
             </div>
         </div>

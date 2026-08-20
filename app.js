@@ -7,6 +7,142 @@ let workshops = [];
 let activeAlarms = [];
 let alarmIntervalId = null;
 let currentAudio = null;
+let expandedMapPanels = {}; // Key: wsIdx, Value: boolean
+
+const CHART_CONFIGS = {
+    "drowned_city": {
+        name: "溺沒海",
+        isVisual: true,
+        startsUnlocked: ["A", "B"],
+        startNode: { x: 420, y: 660, targets: ["A", "B"] },
+        sites: [
+            { id: "A",  x: 457, y: 600, connections: ["C"] },
+            { id: "B",  x: 405, y: 518, connections: ["D", "E"] },
+            { id: "C",  x: 522, y: 474, connections: ["A", "F"] },
+            { id: "D",  x: 283, y: 574, connections: ["B", "G"] },
+            { id: "E",  x: 457, y: 426, connections: ["B", "I", "J"] },
+            { id: "F",  x: 600, y: 592, connections: ["C"] },
+            { id: "G",  x: 196, y: 531, connections: ["D", "H"] },
+            { id: "H",  x: 91,  y: 566, connections: ["G", "L", "M"] },
+            { id: "I",  x: 274, y: 452, connections: ["E", "K"] },
+            { id: "J",  x: 622, y: 426, connections: ["E", "N"], unlocks: "解鎖第二艘潛水艇欄位" },
+            { id: "K",  x: 361, y: 383, connections: ["I", "P"] },
+            { id: "L",  x: 187, y: 396, connections: ["H", "R"] },
+            { id: "M",  x: 78,  y: 439, connections: ["H"] },
+            { id: "N",  x: 561, y: 378, connections: ["J", "W", "O"] },
+            { id: "O",  x: 448, y: 344, connections: ["N", "S"], unlocks: "解鎖第三艘潛水艇欄位" },
+            { id: "P",  x: 200, y: 244, connections: ["K", "Q"] },
+            { id: "Q",  x: 87,  y: 248, connections: ["P"] },
+            { id: "R",  x: 131, y: 370, connections: ["L"] },
+            { id: "S",  x: 235, y: 165, connections: ["O", "T", "U"] },
+            { id: "T",  x: 91,  y: 139, connections: ["S", "Y"], unlocks: "解鎖第四艘潛水艇欄位" },
+            { id: "U",  x: 335, y: 204, connections: ["S", "V"] },
+            { id: "V",  x: 392, y: 165, connections: ["U"] },
+            { id: "W",  x: 505, y: 261, connections: ["N", "X"] },
+            { id: "X",  x: 626, y: 235, connections: ["W"] },
+            { id: "Y",  x: 161, y: 65,  connections: ["T", "Z"] },
+            { id: "Z",  x: 305, y: 78,  connections: ["Y", "AA"] },
+            { id: "AA", x: 579, y: 135, connections: ["Z", "AB", "AC"] },
+            { id: "AB", x: 535, y: 52,  connections: ["AA", "AD"] },
+            { id: "AC", x: 626, y: 70,  connections: ["AA"] },
+            { id: "AD", x: 435, y: 57,  connections: ["AB"], unlocks: "解鎖灰海地圖" }
+        ]
+    },
+    "jade_sea": {
+        name: "灰海",
+        isVisual: true,
+        startsUnlocked: ["A"],
+        startNode: { x: 216, y: 580, targets: ["A"] },
+        sites: [
+            { id: "A", x: 216, y: 514, connections: ["B"] },
+            { id: "B", x: 99,  y: 561, connections: ["A", "C"] },
+            { id: "C", x: 204, y: 394, connections: ["B", "D", "F"] },
+            { id: "D", x: 307, y: 479, connections: ["C", "E"] },
+            { id: "E", x: 417, y: 528, connections: ["D", "Q"] },
+            { id: "Q", x: 494, y: 586, connections: ["E"] },
+            { id: "F", x: 152, y: 285, connections: ["C", "G"] },
+            { id: "G", x: 250, y: 325, connections: ["F", "I", "H"] },
+            { id: "I", x: 349, y: 411, connections: ["G", "M", "J"] },
+            { id: "M", x: 470, y: 410, connections: ["I"] },
+            { id: "H", x: 241, y: 229, connections: ["G", "K"] },
+            { id: "K", x: 85,  y: 187, connections: ["H", "T", "L"] },
+            { id: "T", x: 118, y: 99,  connections: ["K"] },
+            { id: "J", x: 326, y: 301, connections: ["I", "N"] },
+            { id: "N", x: 573, y: 308, connections: ["J", "O", "S"] },
+            { id: "O", x: 526, y: 470, connections: ["N"] },
+            { id: "S", x: 472, y: 199, connections: ["N"] },
+            { id: "L", x: 312, y: 142, connections: ["K", "P"] },
+            { id: "P", x: 401, y: 148, connections: ["L", "R"] },
+            { id: "R", x: 562, y: 89,  connections: ["P"], unlocks: "解鎖翠浪海地圖" }
+        ]
+    }
+};
+
+const LEVEL_BONUS = {
+  51: [2,1,0,0,0],   52: [2,3,0,1,0],   53: [2,3,1,2,1],   54: [3,4,1,3,1],
+  55: [3,7,3,3,1],   56: [4,7,3,5,1],   57: [4,7,3,7,2],   58: [4,8,3,8,3],
+  59: [5,8,4,9,3],   60: [5,10,5,10,5], 61: [7,10,6,10,6], 62: [7,10,8,12,7],
+  63: [8,11,8,12,9], 64: [8,12,10,14,9],65: [10,15,10,15,10],66:[13,17,11,15,10],
+  67: [13,19,13,17,12],68:[16,19,15,17,12],69:[16,23,15,19,13],70:[20,25,15,20,13],
+  71: [23,29,15,20,15],72:[26,29,15,20,15],73:[26,33,17,22,17],74:[26,35,18,23,19],
+  75: [30,40,20,23,20],76:[30,45,20,23,24],77:[34,45,23,29,25],78:[36,45,23,29,27],
+  79: [38,45,25,33,28],80:[40,50,25,35,28],81:[40,50,25,35,30],82:[42,50,32,40,34],
+  83: [43,53,32,40,35],84:[44,53,32,49,38],85:[48,58,33,49,39],86:[50,58,36,49,43],
+  87: [50,60,36,49,43],88:[50,64,36,56,48],89:[50,64,40,60,49],90:[55,70,40,60,50],
+  91: [57,70,41,62,52],92:[57,70,43,64,53],93:[58,72,43,66,54],94:[58,74,45,68,54],
+  95: [60,80,45,70,55]
+};
+
+const PART_STATS = {
+  hull: { // 船體
+    "鯊魚級":      { minLevel: 1,  stats: [-10, 30, 20, 40, 20] },
+    "甲鱟級":      { minLevel: 15, stats: [15, 10, 0, 60, 15] },
+    "鬚鯨級":      { minLevel: 25, stats: [-15, 55, 35, 15, 20] },
+    "腔棘魚級":    { minLevel: 35, stats: [40, -10, 25, 40, 25] },
+    "希爾德拉級":  { minLevel: 45, stats: [10, 75, 30, -15, 5] },
+    "鯊魚改級":    { minLevel: 50, stats: [-5, 40, 25, 45, 35] },
+    "甲鱟改級":    { minLevel: 50, stats: [20, 15, 5, 65, 25] },
+    "鬚鯨改級":    { minLevel: 50, stats: [-10, 55, 40, 20, 30] },
+    "腔棘魚改級":  { minLevel: 50, stats: [40, -5, 30, 40, 30] },
+    "希爾德拉改級":{ minLevel: 50, stats: [10, 80, 30, -15, 10] }
+  },
+  stern: { // 船尾
+    "鯊魚級":      { minLevel: 1,  stats: [-30, 20, 60, 30, 15] },
+    "甲鱟級":      { minLevel: 15, stats: [15, 0, 30, 40, 25] },
+    "鬚鯨級":      { minLevel: 25, stats: [15, 20, 0, 55, 15] },
+    "腔棘魚級":    { minLevel: 35, stats: [10, 25, 35, 25, 25] },
+    "希爾德拉級":  { minLevel: 45, stats: [20, 60, 35, -15, 5] },
+    "鯊魚改級":    { minLevel: 50, stats: [-25, 25, 70, 35, 25] },
+    "甲鱟改級":    { minLevel: 50, stats: [20, 5, 35, 45, 35] },
+    "鬚鯨改級":    { minLevel: 50, stats: [20, 20, 5, 60, 20] },
+    "腔棘魚改級":  { minLevel: 50, stats: [10, 25, 40, 30, 30] },
+    "希爾德拉改級":{ minLevel: 50, stats: [20, 60, 35, -10, 10] }
+  },
+  bow: { // 船首
+    "鯊魚級":      { minLevel: 1,  stats: [50, 40, 10, -20, 15] },
+    "甲鱟級":      { minLevel: 15, stats: [60, 20, 20, -15, 10] },
+    "鬚鯨級":      { minLevel: 25, stats: [25, 60, -15, 20, 15] },
+    "腔棘魚級":    { minLevel: 35, stats: [60, 10, -10, 30, 0] },
+    "希爾德拉級":  { minLevel: 45, stats: [45, 30, -15, 40, 40] },
+    "鯊魚改級":    { minLevel: 50, stats: [55, 50, 15, -15, 25] },
+    "甲鱟改級":    { minLevel: 50, stats: [65, 25, 25, -10, 20] },
+    "鬚鯨改級":    { minLevel: 50, stats: [25, 65, -10, 25, 25] },
+    "腔棘魚改級":  { minLevel: 50, stats: [70, 15, -10, 30, 5] },
+    "希爾德拉改級":{ minLevel: 50, stats: [45, 30, -10, 40, 40] }
+  },
+  bridge: { // 艦橋
+    "鯊魚級":      { minLevel: 1,  stats: [20, 20, 20, 20, 20] },
+    "甲鱟級":      { minLevel: 15, stats: [25, 5, 25, 30, 30] },
+    "鬚鯨級":      { minLevel: 25, stats: [0, 25, 20, 45, 40] },
+    "腔棘魚級":    { minLevel: 35, stats: [55, 20, 35, -15, 50] },
+    "希爾德拉級":  { minLevel: 45, stats: [55, 20, -5, 30, 60] },
+    "鯊魚改級":    { minLevel: 50, stats: [25, 25, 30, 25, 35] },
+    "甲鱟改級":    { minLevel: 50, stats: [30, 10, 30, 35, 40] },
+    "鬚鯨改級":    { minLevel: 50, stats: [0, 30, 25, 50, 45] },
+    "腔棘魚改級":  { minLevel: 50, stats: [60, 20, 35, -10, 55] },
+    "希爾德拉改級":{ minLevel: 50, stats: [60, 20, -5, 30, 60] }
+  }
+};
 
 const DEFAULT_WORKSHOPS = [
     {
@@ -80,6 +216,22 @@ function loadData() {
         workshops = JSON.parse(JSON.stringify(DEFAULT_WORKSHOPS));
         saveData();
     }
+
+    // Ensure every workshop has the charts progress object for backward compatibility
+    workshops.forEach(ws => {
+        if (!ws.charts) {
+            ws.charts = {};
+        }
+        for (const key in CHART_CONFIGS) {
+            if (!ws.charts[key]) {
+                if (CHART_CONFIGS[key].startsUnlocked) {
+                    ws.charts[key] = [...CHART_CONFIGS[key].startsUnlocked];
+                } else {
+                    ws.charts[key] = [];
+                }
+            }
+        }
+    });
 }
 
 // Save Data to LocalStorage
@@ -170,11 +322,34 @@ function renderAllWorkshops() {
         header.innerHTML = `
             <h3>${ws.name} <span class="sub-level">(探索機體數：${activeCount}/${totalCount})</span></h3>
             <div class="workshop-actions">
+                <button class="icon-action-btn" onclick="toggleMapPanel(${wsIdx})" title="海圖解鎖進度"><i class="fa-solid fa-map"></i></button>
                 <button class="icon-action-btn" onclick="openEditWorkshopName(${wsIdx})" title="重新命名部隊"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button class="icon-action-btn delete" onclick="confirmDeleteWorkshop(${wsIdx})" title="刪除部隊工坊"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
         card.appendChild(header);
+
+        // Map progress panel (collapsible)
+        const mapPanel = document.createElement("div");
+        mapPanel.className = "workshop-map-panel";
+        mapPanel.id = `map-panel-${wsIdx}`;
+        mapPanel.style.display = expandedMapPanels[wsIdx] ? "block" : "none";
+        
+        let badgesHTML = '<div class="map-badges-grid">';
+        for (const chartKey in CHART_CONFIGS) {
+            const chartConf = CHART_CONFIGS[chartKey];
+            const unlockedCount = ws.charts[chartKey] ? ws.charts[chartKey].length : 0;
+            const totalSites = chartConf.sites.length;
+            badgesHTML += `
+                <div class="map-badge-item" onclick="openChartModal(${wsIdx}, '${chartKey}')">
+                    <span class="map-badge-name">${chartConf.name}</span>
+                    <span class="map-badge-count">${unlockedCount}/${totalSites}</span>
+                </div>
+            `;
+        }
+        badgesHTML += '</div>';
+        mapPanel.innerHTML = badgesHTML;
+        card.appendChild(mapPanel);
 
         // Submersibles list
         const subList = document.createElement("div");
@@ -513,10 +688,19 @@ function saveWorkshop() {
 
     if (editingWorkshopIndex === null) {
         // Add new
-        workshops.push({
+        const newWs = {
             name: nameInput,
-            submersibles: []
-        });
+            submersibles: [],
+            charts: {}
+        };
+        for (const key in CHART_CONFIGS) {
+            if (CHART_CONFIGS[key].startsUnlocked) {
+                newWs.charts[key] = [...CHART_CONFIGS[key].startsUnlocked];
+            } else {
+                newWs.charts[key] = [];
+            }
+        }
+        workshops.push(newWs);
     } else {
         // Edit name
         workshops[editingWorkshopIndex].name = nameInput;
@@ -703,4 +887,423 @@ function toggleSettings() {
 
 function saveCustomAudioUrl(value) {
     localStorage.setItem("ffxiv_sub_custom_audio_url", value.trim());
+}
+
+// 9. FC Workshop Map Unlock Progress Tracker Logic
+function toggleMapPanel(wsIdx) {
+    const panel = document.getElementById(`map-panel-${wsIdx}`);
+    if (panel) {
+        if (panel.style.display === "none") {
+            panel.style.display = "block";
+            expandedMapPanels[wsIdx] = true;
+        } else {
+            panel.style.display = "none";
+            expandedMapPanels[wsIdx] = false;
+        }
+    }
+}
+
+function openChartModal(wsIdx, chartKey) {
+    const ws = workshops[wsIdx];
+    const chartConf = CHART_CONFIGS[chartKey];
+    if (!ws || !chartConf) return;
+
+    // Set hidden identifiers
+    document.getElementById("chart-modal-ws-idx").value = wsIdx;
+    document.getElementById("chart-modal-chart-key").value = chartKey;
+
+    // Render title and count
+    updateChartModalTitle(wsIdx, chartKey);
+
+    const container = document.getElementById("chart-sites-container");
+    container.innerHTML = "";
+
+    if (chartConf.isVisual) {
+        renderVisualMap(wsIdx, chartKey, container);
+    } else {
+        renderButtonGrid(wsIdx, chartKey, container);
+    }
+
+    openModal("chart-modal");
+}
+
+function renderButtonGrid(wsIdx, chartKey, container) {
+    const ws = workshops[wsIdx];
+    const chartConf = CHART_CONFIGS[chartKey];
+    container.innerHTML = ""; // Clear existing elements first
+    container.className = "sites-grid"; // Restore standard button list grid class
+
+    chartConf.sites.forEach(site => {
+        const btn = document.createElement("div");
+        btn.className = "site-toggle-btn";
+        btn.textContent = site;
+        btn.dataset.site = site;
+
+        const isUnlocked = ws.charts[chartKey] && ws.charts[chartKey].includes(site);
+        if (isUnlocked) {
+            btn.classList.add("selected");
+        }
+
+        btn.onclick = () => toggleSite(wsIdx, chartKey, site, btn);
+        container.appendChild(btn);
+    });
+}
+
+function renderVisualMap(wsIdx, chartKey, container) {
+    const ws = workshops[wsIdx];
+    const chartConf = CHART_CONFIGS[chartKey];
+    container.innerHTML = ""; // Clear existing SVG elements first to prevent duplication
+    container.className = "map-visual-container"; // Set map visual container layout style
+
+    // Create SVG element
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 680 700");
+    svg.setAttribute("class", "map-svg");
+
+    // 1. Draw connection paths (Links)
+    const drawn = new Set();
+    chartConf.sites.forEach(site => {
+        site.connections.forEach(targetId => {
+            const target = chartConf.sites.find(s => s.id === targetId);
+            if (target) {
+                const pairId = [site.id, targetId].sort().join("-");
+                if (!drawn.has(pairId)) {
+                    drawn.add(pairId);
+
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", site.x);
+                    line.setAttribute("y1", site.y);
+                    line.setAttribute("x2", target.x);
+                    line.setAttribute("y2", target.y);
+                    line.setAttribute("class", "map-link");
+
+                    // Connection is active if both endpoints are unlocked
+                    const isSourceUnlocked = ws.charts[chartKey] && ws.charts[chartKey].includes(site.id);
+                    const isTargetUnlocked = ws.charts[chartKey] && ws.charts[chartKey].includes(target.id);
+                    if (isSourceUnlocked && isTargetUnlocked) {
+                        line.classList.add("unlocked");
+                    }
+                    svg.appendChild(line);
+                }
+            }
+        });
+    });
+
+    // 1.1 Draw Starting Point connection lines dynamically from startNode config
+    if (chartConf.startNode) {
+        chartConf.startNode.targets.forEach(targetId => {
+            const target = chartConf.sites.find(s => s.id === targetId);
+            if (target) {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", chartConf.startNode.x);
+                line.setAttribute("y1", chartConf.startNode.y);
+                line.setAttribute("x2", target.x);
+                line.setAttribute("y2", target.y);
+                line.setAttribute("class", "map-link");
+
+                if (ws.charts[chartKey] && ws.charts[chartKey].includes(targetId)) {
+                    line.classList.add("unlocked");
+                }
+                svg.appendChild(line);
+            }
+        });
+    }
+
+    // 2. Draw nodes (G containing Circle + Label + Tooltip)
+    chartConf.sites.forEach(site => {
+        const isUnlocked = ws.charts[chartKey] && ws.charts[chartKey].includes(site.id);
+
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "map-node-group");
+        if (isUnlocked) {
+            g.classList.add("unlocked");
+        }
+        if (site.unlocks) {
+            g.classList.add("special-node");
+        }
+
+        // Handle toggle state immediately on node click
+        g.onclick = () => {
+            const index = ws.charts[chartKey].indexOf(site.id);
+            if (index === -1) {
+                ws.charts[chartKey].push(site.id);
+            } else {
+                ws.charts[chartKey].splice(index, 1);
+            }
+            saveData();
+            updateChartModalTitle(wsIdx, chartKey);
+            // Redraw visual map to update link lines
+            renderVisualMap(wsIdx, chartKey, container);
+        };
+
+        // Circle element (Enlarged to r=17)
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", site.x);
+        circle.setAttribute("cy", site.y);
+        circle.setAttribute("r", "17");
+        circle.setAttribute("class", "map-node");
+        g.appendChild(circle);
+
+        // Site name text
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", site.x);
+        label.setAttribute("y", site.y + 5); // Centered offset for larger radius
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("class", "map-node-label");
+        label.textContent = site.id;
+        g.appendChild(label);
+
+        // Custom Hover Tooltip for special unlock nodes
+        if (site.unlocks) {
+            const tooltip = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tooltip.setAttribute("x", site.x);
+            tooltip.setAttribute("y", site.y - 25); // Adjusted to match larger radius
+            tooltip.setAttribute("text-anchor", "middle");
+            tooltip.setAttribute("class", "map-node-tooltip");
+            tooltip.textContent = getSpecialUnlockShortText(site.id, chartKey);
+            g.appendChild(tooltip);
+
+            // Native fallback title tooltip for accessibility
+            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+            title.textContent = `解鎖需求：${site.unlocks}`;
+            g.appendChild(title);
+        }
+
+        svg.appendChild(g);
+    });
+
+    // 3. Draw Starting Point Node (Static, non-clickable, neutral color)
+    if (chartConf.startNode) {
+        const startG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        startG.setAttribute("class", "map-node-group-static");
+
+        const startCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        startCircle.setAttribute("cx", chartConf.startNode.x);
+        startCircle.setAttribute("cy", chartConf.startNode.y);
+        startCircle.setAttribute("r", "17");
+        startCircle.setAttribute("class", "map-start-node");
+        startG.appendChild(startCircle);
+
+        const startLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        startLabel.setAttribute("x", chartConf.startNode.x);
+        startLabel.setAttribute("y", chartConf.startNode.y + 4);
+        startLabel.setAttribute("text-anchor", "middle");
+        startLabel.setAttribute("class", "map-start-label");
+        startLabel.textContent = "起點";
+        startG.appendChild(startLabel);
+
+        svg.appendChild(startG);
+    }
+
+    container.appendChild(svg);
+}
+
+function getSpecialUnlockShortText(nodeId, chartKey) {
+    if (chartKey === "drowned_city") {
+        switch (nodeId) {
+            case "J": return "解鎖第 2 艘潛水艇";
+            case "O": return "解鎖第 3 艘潛水艇";
+            case "T": return "解鎖第 4 艘潛水艇";
+            case "AD": return "解鎖灰海地圖";
+        }
+    } else if (chartKey === "jade_sea") {
+        switch (nodeId) {
+            case "R": return "解鎖翠浪海地圖";
+        }
+    }
+    return "";
+}
+
+function updateChartModalTitle(wsIdx, chartKey) {
+    const ws = workshops[wsIdx];
+    const chartConf = CHART_CONFIGS[chartKey];
+    const unlockedCount = ws.charts[chartKey] ? ws.charts[chartKey].length : 0;
+    
+    // Total sites depends on structure type
+    const totalCount = chartConf.sites.length;
+    document.getElementById("chart-modal-title").textContent = `${chartConf.name} (${unlockedCount}/${totalCount})`;
+}
+
+function toggleSite(wsIdx, chartKey, site, btnElement) {
+    const ws = workshops[wsIdx];
+    if (!ws) return;
+
+    if (!ws.charts[chartKey]) {
+        ws.charts[chartKey] = [];
+    }
+
+    const index = ws.charts[chartKey].indexOf(site);
+    if (index === -1) {
+        ws.charts[chartKey].push(site);
+        btnElement.classList.add("selected");
+    } else {
+        ws.charts[chartKey].splice(index, 1);
+        btnElement.classList.remove("selected");
+    }
+
+    // Save IMMEDIATELY on every click
+    saveData();
+    updateChartModalTitle(wsIdx, chartKey);
+}
+
+function chartBulkAction(actionType) {
+    const wsIdx = parseInt(document.getElementById("chart-modal-ws-idx").value);
+    const chartKey = document.getElementById("chart-modal-chart-key").value;
+    const ws = workshops[wsIdx];
+    const chartConf = CHART_CONFIGS[chartKey];
+    if (!ws || !chartConf) return;
+
+    if (chartConf.isVisual) {
+        if (actionType === "all") {
+            ws.charts[chartKey] = chartConf.sites.map(s => s.id);
+        } else if (actionType === "clear") {
+            ws.charts[chartKey] = [];
+        }
+        
+        saveData();
+        updateChartModalTitle(wsIdx, chartKey);
+        
+        // Redraw SVG Visual map
+        const container = document.getElementById("chart-sites-container");
+        renderVisualMap(wsIdx, chartKey, container);
+    } else {
+        const btns = document.querySelectorAll("#chart-sites-container .site-toggle-btn");
+        if (actionType === "all") {
+            ws.charts[chartKey] = [...chartConf.sites];
+            btns.forEach(btn => btn.classList.add("selected"));
+        } else if (actionType === "clear") {
+            ws.charts[chartKey] = [];
+            btns.forEach(btn => btn.classList.remove("selected"));
+        }
+        
+        saveData();
+        updateChartModalTitle(wsIdx, chartKey);
+    }
+}
+
+function closeChartModal() {
+    closeModal("chart-modal");
+    // Redraw list to reflect updated counts on the badges
+    renderAllWorkshops();
+}
+
+// 10. Submersible Stats Calculator Logic
+function openStatsCalculator() {
+    // 1. Populate level options 1 to 95 if not already populated
+    const lvlSelect = document.getElementById("calc-level");
+    if (lvlSelect.options.length === 0) {
+        for (let lvl = 1; lvl <= 95; lvl++) {
+            const opt = document.createElement("option");
+            opt.value = lvl;
+            opt.textContent = `Lv. ${lvl}`;
+            lvlSelect.appendChild(opt);
+        }
+        // Default to Lv. 50 to showcase some parts without bonus
+        lvlSelect.value = "50";
+    }
+
+    // 2. Initialize or update part dropdowns
+    updatePartDropdowns();
+
+    // 3. Open Modal
+    openModal("stats-modal");
+}
+
+function onCalcLevelChange() {
+    // Re-filter and rebuild dropdowns, keeping selected items if still valid
+    updatePartDropdowns();
+}
+
+function getPartPrefix(name) {
+    switch (name) {
+        case "鯊魚級": return "1. ";
+        case "甲鱟級": return "2. ";
+        case "鬚鯨級": return "3. ";
+        case "腔棘魚級": return "4. ";
+        case "希爾德拉級": return "5. ";
+        case "鯊魚改級": return "1改. ";
+        case "甲鱟改級": return "2改. ";
+        case "鬚鯨改級": return "3改. ";
+        case "腔棘魚改級": return "4改. ";
+        case "希爾德拉改級": return "5改. ";
+        default: return "";
+    }
+}
+
+function updatePartDropdowns() {
+    const level = parseInt(document.getElementById("calc-level").value) || 1;
+    const parts = ["hull", "stern", "bow", "bridge"];
+
+    parts.forEach(partKey => {
+        const select = document.getElementById(`calc-${partKey}`);
+        if (!select) return;
+        const prevValue = select.value; // Try to keep previous selection if valid
+
+        // Clear select
+        select.innerHTML = "";
+
+        // Fill options where minLevel <= level
+        const partConfig = PART_STATS[partKey];
+        for (const name in partConfig) {
+            const item = partConfig[name];
+            if (item.minLevel <= level) {
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = `${getPartPrefix(name)}${name} (Lv. ${item.minLevel}+)`;
+                select.appendChild(opt);
+            }
+        }
+
+        // Restore selection if valid, otherwise it defaults to first valid option (鯊魚級)
+        if (prevValue && partConfig[prevValue] && partConfig[prevValue].minLevel <= level) {
+            select.value = prevValue;
+        }
+    });
+
+    // Recalculate values immediately
+    calculateSubStats();
+}
+
+function calculateSubStats() {
+    const level = parseInt(document.getElementById("calc-level").value) || 1;
+    
+    // Get parts select elements
+    const hullSelect = document.getElementById("calc-hull");
+    const sternSelect = document.getElementById("calc-stern");
+    const bowSelect = document.getElementById("calc-bow");
+    const bridgeSelect = document.getElementById("calc-bridge");
+
+    if (!hullSelect || !sternSelect || !bowSelect || !bridgeSelect) return;
+
+    // Get parts values
+    const hullName = hullSelect.value;
+    const sternName = sternSelect.value;
+    const bowName = bowSelect.value;
+    const bridgeName = bridgeSelect.value;
+
+    // Default arrays
+    const defaultStats = [0, 0, 0, 0, 0];
+    
+    // Fetch stats
+    const hullStats = (PART_STATS.hull[hullName] && PART_STATS.hull[hullName].stats) || defaultStats;
+    const sternStats = (PART_STATS.stern[sternName] && PART_STATS.stern[sternName].stats) || defaultStats;
+    const bowStats = (PART_STATS.bow[bowName] && PART_STATS.bow[bowName].stats) || defaultStats;
+    const bridgeStats = (PART_STATS.bridge[bridgeName] && PART_STATS.bridge[bridgeName].stats) || defaultStats;
+
+    // Fetch level bonus
+    const lvlBonus = (level >= 51 && LEVEL_BONUS[level]) ? LEVEL_BONUS[level] : defaultStats;
+
+    // Calculate sums
+    const surveillance = hullStats[0] + sternStats[0] + bowStats[0] + bridgeStats[0] + lvlBonus[0];
+    const retrieval = hullStats[1] + sternStats[1] + bowStats[1] + bridgeStats[1] + lvlBonus[1];
+    const speed = hullStats[2] + sternStats[2] + bowStats[2] + bridgeStats[2] + lvlBonus[2];
+    const range = hullStats[3] + sternStats[3] + bowStats[3] + bridgeStats[3] + lvlBonus[3];
+    const favor = hullStats[4] + sternStats[4] + bowStats[4] + bridgeStats[4] + lvlBonus[4];
+
+    // Update UI elements
+    document.getElementById("stat-val-surveillance").textContent = surveillance;
+    document.getElementById("stat-val-retrieval").textContent = retrieval;
+    document.getElementById("stat-val-speed").textContent = speed;
+    document.getElementById("stat-val-range").textContent = range;
+    document.getElementById("stat-val-favor").textContent = favor;
 }
