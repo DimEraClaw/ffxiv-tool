@@ -1370,8 +1370,8 @@ function evaluateRoute(sectorList, chartData, speed) {
     totalTravelMinutes += Math.floor((distToFirst * 39.9) / safeSpeed);
     totalRangeCost += distToFirst;
     
-    // In FFXIV, Survey Time is also reduced by Speed: (baseSurveyMin * 120 / speed)
-    const sTime0 = Math.floor((sectorList[0].surveyDurationMin * 120) / safeSpeed);
+    // In FFXIV / Mogship: Survey Time is reduced by Speed with factor (7015 / (speed * 60))
+    const sTime0 = Math.floor((sectorList[0].surveyDurationMin * 7015) / (safeSpeed * 60));
     totalSurveyMinutes += sTime0;
     totalExp += sectorList[0].expReward;
     maxRankReq = Math.max(maxRankReq, sectorList[0].rankReq || 1);
@@ -1383,7 +1383,7 @@ function evaluateRoute(sectorList, chartData, speed) {
         totalTravelMinutes += Math.floor((legDist * 39.9) / safeSpeed);
         totalRangeCost += legDist;
         
-        const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * 120) / safeSpeed);
+        const sTime = Math.floor((sectorList[i + 1].surveyDurationMin * 7015) / (safeSpeed * 60));
         totalSurveyMinutes += sTime;
         totalExp += sectorList[i + 1].expReward;
         if (sectorList[i + 1].rankReq > maxRankReq) maxRankReq = sectorList[i + 1].rankReq;
@@ -1395,12 +1395,15 @@ function evaluateRoute(sectorList, chartData, speed) {
     const distToHome = calculate3DDistance(lastSector, start);
     totalTravelMinutes += Math.floor((distToHome * 39.9) / safeSpeed);
 
+    // Calibrated Range cost to match Mogship and in-game exploration range overhead
+    const calibratedRangeCost = totalRangeCost + Math.floor(sectorList.length * 0.6);
+
     const totalMinutes = totalTravelMinutes + totalSurveyMinutes;
     const expPerMin = totalMinutes > 0 ? Math.round(totalExp / totalMinutes) : 0;
 
     return {
         sectors: [...sectorList],
-        totalRangeCost,
+        totalRangeCost: calibratedRangeCost,
         totalTravelMinutes,
         totalSurveyMinutes,
         totalMinutes,
